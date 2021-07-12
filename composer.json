@@ -1,0 +1,52 @@
+{
+    "name": "onlime/laravel-http-client-global-logger",
+    "description": "A global logger for the Laravel HTTP Client",
+    "keywords": [
+        "onlime",
+        "laravel-http-client-global-logger",
+        "laravel",
+        "http-client",
+        "guzzle",
+        "log",
+        "logger",
+        "logging",
+        "psr3"
+    ],
+    "homepage": "https://github.com/onlime/laravel-http-client-global-logger",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Philip Iezzi",
+            "email": "philip@onlime.ch",
+            "role": "Developer"
+        },
+        {
+            "name": "Onlime GmbH",
+            "homepage": "https://www.onlime.ch/"
+        }
+    ],
+    "require": {
+        "php": "^8.0",
+        "guzzlehttp/guzzle": "^7.3",
+        "illuminate/http": "^8.0",
+        "illuminate/support": "^8.0",
+        "monolog/monolog": "^2.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Onlime\\LaravelHttpClientGlobalLogger\\": "src/"
+        }
+    },
+    "config": {
+        "sort-packages": true
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Onlime\\LaravelHttpClientGlobalLogger\\Providers\\ServiceProvider"
+            ]
+        }
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true
+}
