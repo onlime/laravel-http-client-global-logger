@@ -98,9 +98,13 @@ return [
     'obfuscate' => [
         'enabled' => env('HTTP_CLIENT_GLOBAL_LOGGER_OBFUSCATE_ENABLED', true),
         'replacement' => env('HTTP_CLIENT_GLOBAL_LOGGER_OBFUSCATE_REPLACEMENT', '**********'),
-        'patterns' => [
-            '/(?<="pass":").*(?=")/mU',
-            '/(?<=Authorization:\sBearer ).*/m',
-        ],
+        'headers' => explode(',', env(
+            'HTTP_CLIENT_GLOBAL_LOGGER_OBFUSCATE_HEADERS',
+            'Authorization'
+        )),
+        'body_keys' => explode(',', env(
+            'HTTP_CLIENT_GLOBAL_LOGGER_OBFUSCATE_BODY_KEYS',
+            'pass,password,token,apikey'
+        )),
     ]
 ];
