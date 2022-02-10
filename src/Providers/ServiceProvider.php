@@ -22,9 +22,6 @@ class ServiceProvider extends BaseServiceProvider
         }
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function boot()
     {
         $this->publishes([
@@ -53,10 +50,8 @@ class ServiceProvider extends BaseServiceProvider
 
     /**
      * Get package config file location.
-     *
-     * @return bool|string
      */
-    protected function configFileLocation()
+    protected function configFileLocation(): string
     {
         return realpath(__DIR__ . '/../../config/http-client-global-logger.php');
     }
