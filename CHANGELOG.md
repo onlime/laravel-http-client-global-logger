@@ -1,8 +1,8 @@
 # CHANGELOG
 
-## [1.x (Unreleased)](https://github.com/onlime/laravel-http-client-global-logger/compare/1.0...main)
+## [v1.0.x (Unreleased)](https://github.com/onlime/laravel-http-client-global-logger/compare/v1.0.0...main)
 
-## [1.0.0 (2022-02-10)](https://github.com/onlime/laravel-http-client-global-logger/releases/tag/1.0.0)
+## [v1.0.0 (2022-02-10)](https://github.com/onlime/laravel-http-client-global-logger/releases/tag/v1.0.0)
 
 - Support Laravel 9
 
