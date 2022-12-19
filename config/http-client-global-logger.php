@@ -106,5 +106,5 @@ return [
             'HTTP_CLIENT_GLOBAL_LOGGER_OBFUSCATE_BODY_KEYS',
             'pass,password,token,apikey'
         )),
-    ]
+    ],
 ];

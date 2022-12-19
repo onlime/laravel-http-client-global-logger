@@ -2,11 +2,11 @@
 
 namespace Onlime\LaravelHttpClientGlobalLogger\Providers;
 
-use Onlime\LaravelHttpClientGlobalLogger\Listeners\LogRequestSending;
-use Onlime\LaravelHttpClientGlobalLogger\Listeners\LogResponseReceived;
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as BaseEventServiceProvider;
 use Illuminate\Http\Client\Events\RequestSending;
 use Illuminate\Http\Client\Events\ResponseReceived;
+use Onlime\LaravelHttpClientGlobalLogger\Listeners\LogRequestSending;
+use Onlime\LaravelHttpClientGlobalLogger\Listeners\LogResponseReceived;
 
 class EventServiceProvider extends BaseEventServiceProvider
 {

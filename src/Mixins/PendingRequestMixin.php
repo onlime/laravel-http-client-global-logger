@@ -18,7 +18,7 @@ class PendingRequestMixin
          * @return $this
          */
         return function (string $name = null) {
-            if (!config('http-client-global-logger.enabled')) {
+            if (! config('http-client-global-logger.enabled')) {
                 return $this;
             }
 
@@ -30,7 +30,7 @@ class PendingRequestMixin
 
             /** @var Logger $logger */
             $logger = Log::channel(config('http-client-global-logger.channel'));
-            if (!is_null($name)) {
+            if (! is_null($name)) {
                 $logger = $logger->withName($name);
             }
             foreach ($messageFormats as $format) {
