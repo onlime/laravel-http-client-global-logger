@@ -4,6 +4,7 @@
 
 - Drop Laravel 8 / PHP 8.0 support
 - Integrated `laravel/pint` as dev requirement for PHP style fixing
+- Support Laravel 10
 
 ## [v1.0.0 (2022-02-10)](https://github.com/onlime/laravel-http-client-global-logger/compare/v0.9.1...v1.0.0)
 

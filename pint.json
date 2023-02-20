@@ -7,8 +7,8 @@
         "binary_operator_spaces": false,
         "concat_space": false,
         "no_unused_imports": false,
+        "phpdoc_separation": false,
         "Laravel/laravel_phpdoc_alignment": false,
-        "Laravel/laravel_phpdoc_separation": false,
         "modernize_strpos": true
     },
     "exclude": [
