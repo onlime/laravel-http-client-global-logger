@@ -12,7 +12,6 @@ class LogRequestSending
     /**
      * Handle the event.
      *
-     * @param RequestSending $event
      * @return void
      */
     public function handle(RequestSending $event)
@@ -42,9 +41,6 @@ class LogRequestSending
 
     /**
      * Obfuscate headers, e.g. Authorization header.
-     *
-     * @param RequestInterface $request
-     * @return RequestInterface
      */
     protected function obfuscateHeaders(RequestInterface $request): RequestInterface
     {

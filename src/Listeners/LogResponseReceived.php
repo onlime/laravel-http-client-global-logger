@@ -11,7 +11,6 @@ class LogResponseReceived
     /**
      * Handle the event.
      *
-     * @param ResponseReceived $event
      * @return void
      */
     public function handle(ResponseReceived $event)
