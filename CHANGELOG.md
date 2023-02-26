@@ -1,6 +1,10 @@
 # CHANGELOG
 
-## [v1.0.x (Unreleased)](https://github.com/onlime/laravel-http-client-global-logger/compare/v1.0.0...main)
+## [v1.0.x (Unreleased)](https://github.com/onlime/laravel-http-client-global-logger/compare/v1.0.1...main)
+
+- ...
+
+## [v1.0.1 (2023-02-26)](https://github.com/onlime/laravel-http-client-global-logger/compare/v1.0.0...v1.0.1)
 
 - Drop Laravel 8 / PHP 8.0 support
 - Integrated `laravel/pint` as dev requirement for PHP style fixing
