@@ -29,7 +29,7 @@ class LogRequestSending
         if ($obfuscate) {
             foreach (config('http-client-global-logger.obfuscate.body_keys') as $key) {
                 $message = preg_replace(
-                    '/(?<="' . $key . '":").*(?=")/mU',
+                    '/(?<="'.$key.'":").*(?=")/mU',
                     config('http-client-global-logger.obfuscate.replacement'),
                     $message
                 );

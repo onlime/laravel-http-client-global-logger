@@ -14,7 +14,7 @@ class PendingRequestMixin
     public function log()
     {
         /**
-         * @param string|null $name logger name
+         * @param  string|null  $name logger name
          * @return $this
          */
         return function (string $name = null) {

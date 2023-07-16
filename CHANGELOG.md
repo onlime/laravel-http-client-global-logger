@@ -4,6 +4,11 @@
 
 - ...
 
+## [v1.0.2 (2023-07-17)](https://github.com/onlime/laravel-http-client-global-logger/compare/v1.0.1...v1.0.2)
+
+- Drop Laravel 9 support
+- PHP code style fixes by `laravel/pint` v1.10, now using more strict style rules (`laravel` preset).
+
 ## [v1.0.1 (2023-02-26)](https://github.com/onlime/laravel-http-client-global-logger/compare/v1.0.0...v1.0.1)
 
 - Drop Laravel 8 / PHP 8.0 support

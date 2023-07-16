@@ -53,6 +53,6 @@ class ServiceProvider extends BaseServiceProvider
      */
     protected function configFileLocation(): string
     {
-        return realpath(__DIR__ . '/../../config/http-client-global-logger.php');
+        return realpath(__DIR__.'/../../config/http-client-global-logger.php');
     }
 }
