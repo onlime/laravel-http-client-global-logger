@@ -1,6 +1,10 @@
-/vendor/
+.phpunit.cache
+.phpunit.result.cache
+.pint.cache.json
 /.idea
 /composer.lock
 /tests/_coverage
-.phpunit.result.cache
-.pint.cache.json
+/vendor/
+build
+coverage
+phpunit.xml
