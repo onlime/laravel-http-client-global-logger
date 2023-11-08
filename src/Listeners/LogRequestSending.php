@@ -5,16 +5,29 @@ namespace Onlime\LaravelHttpClientGlobalLogger\Listeners;
 use GuzzleHttp\MessageFormatter;
 use Illuminate\Http\Client\Events\RequestSending;
 use Illuminate\Support\Facades\Log;
+use Onlime\LaravelHttpClientGlobalLogger\HttpClientLogger;
 use Psr\Http\Message\RequestInterface;
 
 class LogRequestSending
 {
     /**
-     * Handle the event.
+     * Handle the event if the middleware was not added manually.
      *
      * @return void
      */
     public function handle(RequestSending $event)
+    {
+        if (!HttpClientLogger::requestMiddlewareWasAdded()) {
+            $this->handleEvent($event);
+        }
+    }
+
+    /**
+     * Handle the event.
+     *
+     * @return void
+     */
+    public function handleEvent(RequestSending $event)
     {
         $obfuscate  = config('http-client-global-logger.obfuscate.enabled');
         $psrRequest = $event->request->toPsrRequest();
@@ -29,7 +42,7 @@ class LogRequestSending
         if ($obfuscate) {
             foreach (config('http-client-global-logger.obfuscate.body_keys') as $key) {
                 $message = preg_replace(
-                    '/(?<="'.$key.'":").*(?=")/mU',
+                    '/(?<="' . $key . '":").*(?=")/mU',
                     config('http-client-global-logger.obfuscate.replacement'),
                     $message
                 );
