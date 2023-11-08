@@ -12,10 +12,8 @@ class LogRequestSending
 {
     /**
      * Handle the event if the middleware was not added manually.
-     *
-     * @return void
      */
-    public function handle(RequestSending $event)
+    public function handle(RequestSending $event): void
     {
         if (!HttpClientLogger::requestMiddlewareWasAdded()) {
             $this->handleEvent($event);
@@ -24,10 +22,8 @@ class LogRequestSending
 
     /**
      * Handle the event.
-     *
-     * @return void
      */
-    public function handleEvent(RequestSending $event)
+    public function handleEvent(RequestSending $event): void
     {
         $obfuscate  = config('http-client-global-logger.obfuscate.enabled');
         $psrRequest = $event->request->toPsrRequest();

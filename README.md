@@ -52,8 +52,13 @@ Using the logger will log both the request and response of an external HTTP requ
 - **Variant 2: Mixin** (`HTTP_CLIENT_GLOBAL_LOGGER_MIXIN=true`)
   - Enabled only on individual HTTP Client instances, using `Http::log()` - no global logging.
   - Log channel name can be set per HTTP Client instance by passing a name to `Http::log($name)`
+- **Variant 3: Global HTTP Middleware**
+  - Can be used in combination with other `Http::globalRequestMiddleware()` calls in your `AppServiceProvider`'s `boot()` method, after registering your [Global Middleware](https://laravel.com/docs/10.x/http-client#global-middleware).
+
 
 ## Usage
+
+> **NOTE:** For all 3 variants below, you need to keep the HTTP Client Global Logger enabled (not setting `HTTP_CLIENT_GLOBAL_LOGGER_ENABLED=false` in your `.env`). The `http-client-global-logger.enabled` config option is a global on/off switch for all 3 variants, not just the "global" variants. Our project name might be misleading in that context.
 
 ### Variant 1: Global Logging
 
@@ -105,7 +110,7 @@ $response = $client->get('/user');
 
 ### Variant 3: Global HTTP Middleware
 
-If you use [Global Middleware](https://laravel.com/docs/10.x/http-client#global-middleware), you should be aware that *Variant 1* uses Laravel's `RequestSending` event to log HTTP requests. This event is fired **before** Global Middleware is executed. Therefore, any modifications to the request made by Global Middleware will not be logged. To overcome this, this package provides a middleware that you may add after your Global Middleware.
+If you use [Global Middleware](https://laravel.com/docs/10.x/http-client#global-middleware) (`Http::globalRequestMiddleware()` and `Http::globalResponseMiddleware()` methods), you should be aware that *Variant 1* uses Laravel's `RequestSending` event to log HTTP requests. This event is fired **before** Global Middleware is executed. Therefore, any modifications to the request made by Global Middleware will not be logged. To overcome this, this package provides a middleware that you may add after your Global Middleware.
 
 You may add the middleware using the static `addRequestMiddleware()` method on the `HttpClientLogger` class:
 

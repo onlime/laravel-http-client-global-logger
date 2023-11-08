@@ -18,6 +18,10 @@ class HttpClientLogger
 
     public static function addRequestMiddleware(): void
     {
+        if (! config('http-client-global-logger.enabled')) {
+            return;
+        }
+
         Http::globalRequestMiddleware(
             fn (RequestInterface $psrRequest) => tap($psrRequest, function (RequestInterface $psrRequest) {
                 // Wrap PSR-7 request into Laravel's HTTP Client Request object
