@@ -15,7 +15,7 @@ class LogRequestSending
      */
     public function handle(RequestSending $event): void
     {
-        if (!HttpClientLogger::requestMiddlewareWasAdded()) {
+        if (! HttpClientLogger::requestMiddlewareWasAdded()) {
             $this->handleEvent($event);
         }
     }
