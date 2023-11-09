@@ -1,8 +1,12 @@
 # CHANGELOG
 
-## [v1.0.x (Unreleased)](https://github.com/onlime/laravel-http-client-global-logger/compare/v1.0.1...main)
+## [v1.1.x (Unreleased)](https://github.com/onlime/laravel-http-client-global-logger/compare/v1.1.0...main)
 
 - ...
+
+## [v1.1.0 (2023-11-09)](https://github.com/onlime/laravel-http-client-global-logger/compare/v1.0.2...v1.1.0)
+
+- Feature | HTTP Request Middleware to log Requests after Global Middleware by @pascalbaljet in #1
 
 ## [v1.0.2 (2023-07-17)](https://github.com/onlime/laravel-http-client-global-logger/compare/v1.0.1...v1.0.2)
 

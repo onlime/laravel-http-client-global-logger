@@ -34,15 +34,32 @@
     },
     "require-dev": {
         "laravel/framework": "^10.0",
-        "laravel/pint": "^1.10"
+        "laravel/pint": "^1.10",
+        "orchestra/testbench": "^8.8",
+        "pestphp/pest": "^2.20",
+        "pestphp/pest-plugin-arch": "^2.0",
+        "pestphp/pest-plugin-laravel": "^2.0"
     },
     "autoload": {
         "psr-4": {
             "Onlime\\LaravelHttpClientGlobalLogger\\": "src/"
         }
     },
+    "autoload-dev": {
+        "psr-4": {
+            "Onlime\\LaravelHttpClientGlobalLogger\\Tests\\": "tests/"
+        }
+    },
+    "scripts": {
+        "test": "vendor/bin/pest",
+        "test-coverage": "vendor/bin/pest --coverage",
+        "format": "vendor/bin/pint"
+    },
     "config": {
-        "sort-packages": true
+        "sort-packages": true,
+        "allow-plugins": {
+            "pestphp/pest-plugin": true
+        }
     },
     "extra": {
         "laravel": {

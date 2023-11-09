@@ -52,8 +52,13 @@ Using the logger will log both the request and response of an external HTTP requ
 - **Variant 2: Mixin** (`HTTP_CLIENT_GLOBAL_LOGGER_MIXIN=true`)
   - Enabled only on individual HTTP Client instances, using `Http::log()` - no global logging.
   - Log channel name can be set per HTTP Client instance by passing a name to `Http::log($name)`
+- **Variant 3: Global HTTP Middleware**
+  - Can be used in combination with other `Http::globalRequestMiddleware()` calls in your `AppServiceProvider`'s `boot()` method, after registering your [Global Middleware](https://laravel.com/docs/10.x/http-client#global-middleware).
+
 
 ## Usage
+
+> **NOTE:** For all 3 variants below, you need to keep the HTTP Client Global Logger enabled (not setting `HTTP_CLIENT_GLOBAL_LOGGER_ENABLED=false` in your `.env`). The `http-client-global-logger.enabled` config option is a global on/off switch for all 3 variants, not just the "global" variants. Our project name might be misleading in that context.
 
 ### Variant 1: Global Logging
 
@@ -103,6 +108,31 @@ $client = Http::log('my-api')->withOptions([
 $response = $client->get('/user');
 ```
 
+### Variant 3: Global HTTP Middleware
+
+If you use [Global Middleware](https://laravel.com/docs/10.x/http-client#global-middleware) (`Http::globalRequestMiddleware()` and `Http::globalResponseMiddleware()` methods), you should be aware that *Variant 1* uses Laravel's `RequestSending` event to log HTTP requests. This event is fired **before** Global Middleware is executed. Therefore, any modifications to the request made by Global Middleware will not be logged. To overcome this, this package provides a middleware that you may add after your Global Middleware.
+
+You may add the middleware using the static `addRequestMiddleware()` method on the `HttpClientLogger` class:
+
+```php
+use Onlime\LaravelHttpClientGlobalLogger\HttpClientLogger;
+
+HttpClientLogger::addRequestMiddleware();
+```
+
+For example, you may add this to your `AppServiceProvider`'s `boot()` method after registering your Global Middleware:
+
+```php
+use Illuminate\Support\Facades\Http;
+use Onlime\LaravelHttpClientGlobalLogger\HttpClientLogger;
+
+Http::globalRequestMiddleware(fn ($request) => $request->withHeader(
+    'User-Agent', 'My Custom User Agent'
+));
+
+HttpClientLogger::addRequestMiddleware();
+```
+
 ## Logging example
 
 By default, logs are written to a separate logfile `http-client.log`.
@@ -146,9 +176,9 @@ So, my recommendation: If you need global logging without any extra configuratio
 ## Caveats
 
 - This package currently uses two different implementations for logging. In the preferred variant 1 (global logging), it is currently not possible to configure the [log channel name](https://laravel.com/docs/logging#configuring-the-channel-name) which defaults to current environment, such as `production` or `local`. If you with to use Laravel HTTP Client to access multiple different external APIs, it is nice to explicitely distinguish between them by different log channel names.
-  
+
   As a workaround, I have implemented another way of logging through `Http::log()` method as mixin. But of course, we should combine both variants into a single one for a cleaner codebase.
-  
+
 - Very basic obfuscation support using regex with lookbehind assertions (e.g. `/(?<=Authorization:\sBearer ).*/m`, modifying formatted log output. It's currently not possible to directly modify request headers or JSON data in request body.
 
 - Obfuscation currently only works in variant 1 (global logging).
