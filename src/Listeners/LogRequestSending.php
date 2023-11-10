@@ -5,8 +5,8 @@ namespace Onlime\LaravelHttpClientGlobalLogger\Listeners;
 use GuzzleHttp\MessageFormatter;
 use Illuminate\Http\Client\Events\RequestSending;
 use Illuminate\Support\Facades\Log;
+use Onlime\LaravelHttpClientGlobalLogger\EventHelper;
 use Onlime\LaravelHttpClientGlobalLogger\HttpClientLogger;
-use Onlime\LaravelHttpClientGlobalLogger\SaloonHelper;
 use Psr\Http\Message\RequestInterface;
 use Saloon\Laravel\Events\SendingSaloonRequest;
 
@@ -27,13 +27,11 @@ class LogRequestSending
      */
     public function handleEvent(RequestSending|SendingSaloonRequest $event): void
     {
-        if (! SaloonHelper::shouldBeLogged($event)) {
+        if (! EventHelper::shouldBeLogged($event)) {
             return;
         }
 
-        $psrRequest = $event instanceof RequestSending
-            ? $event->request->toPsrRequest()
-            : $event->pendingRequest->createPsrRequest();
+        $psrRequest = EventHelper::getPsrRequest($event);
 
         $obfuscate  = config('http-client-global-logger.obfuscate.enabled');
 
