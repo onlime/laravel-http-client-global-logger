@@ -2,7 +2,7 @@
 
 ## [v1.1.x (Unreleased)](https://github.com/onlime/laravel-http-client-global-logger/compare/v1.1.0...main)
 
-- ...
+- Added common OAuth2 keys `access_token,refresh_token,client_secret` to default body obfuscation configuration.
 
 ## [v1.1.0 (2023-11-09)](https://github.com/onlime/laravel-http-client-global-logger/compare/v1.0.2...v1.1.0)
 

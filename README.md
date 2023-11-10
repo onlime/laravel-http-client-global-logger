@@ -165,7 +165,7 @@ Both packages provide a different feature set and have those advantages:
   - global logging
   - auto-configured log channel `http-client` to log to a separate `http-client.log` file
   - Full support of [Guzzle MessageFormatter](https://github.com/guzzle/guzzle/blob/master/src/MessageFormatter.php) variable substitutions for highly customized log messages.
-  - obfuscation of credentials in HTTP Client requests
+  - basic obfuscation of credentials in HTTP Client requests
 - [bilfeldt/laravel-http-client-logger](https://github.com/bilfeldt/laravel-http-client-logger)
   - conditional logging using `logWhen($condition)`
   - filtering of logs by HTTP response codes
@@ -175,19 +175,26 @@ So, my recommendation: If you need global logging without any extra configuratio
 
 ## Caveats
 
-- This package currently uses two different implementations for logging. In the preferred variant 1 (global logging), it is currently not possible to configure the [log channel name](https://laravel.com/docs/logging#configuring-the-channel-name) which defaults to current environment, such as `production` or `local`. If you with to use Laravel HTTP Client to access multiple different external APIs, it is nice to explicitely distinguish between them by different log channel names.
+- This package currently uses two different implementations for logging. In the preferred variant 1 or 3 (global logging), it is currently not possible to configure the [log channel name](https://laravel.com/docs/logging#configuring-the-channel-name) which defaults to current environment, such as `production` or `local`. If you with to use Laravel HTTP Client to access multiple different external APIs, it is nice to explicitly distinguish between them by different log channel names.
 
   As a workaround, I have implemented another way of logging through `Http::log()` method as mixin. But of course, we should combine both variants into a single one for a cleaner codebase.
 
-- Very basic obfuscation support using regex with lookbehind assertions (e.g. `/(?<=Authorization:\sBearer ).*/m`, modifying formatted log output. It's currently not possible to directly modify request headers or JSON data in request body.
+- Obfuscation
 
-- Obfuscation currently only works in variant 1 (global logging).
+  - Body keys: Very basic obfuscation support using regex with lookbehind assertions (e.g. `/(?<="token":").*(?=")/mU`, modifying formatted log output. It's currently not possible to directly modify JSON data in request body.
+
+  - No obfuscation of query params, e.g. on a POST request to an OAuth2 token endpoint.
+
+  - Obfuscation currently only works in variant 1 or 3 (global logging).
+
 
 ## Testing
 
-TBD.
+Currently, there is very basic code/test coverage. We're using [PEST](https://pestphp.com/), so just run all tests like so:
 
-(any help appreciated!)
+```bash
+$ ./vendor/bin/pest
+```
 
 ## Changes
 
@@ -195,7 +202,7 @@ All changes are listed in [CHANGELOG](CHANGELOG.md)
 
 ## Authors
 
-Author of this shitty little package is **[Philip Iezzi (Onlime GmbH)](https://www.onlime.ch/)**.
+Made with ❤️ by **[Philip Iezzi (Onlime GmbH)](https://www.onlime.ch/)**.
 
 ## License
 
