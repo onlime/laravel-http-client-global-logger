@@ -12,10 +12,8 @@ class LogResponseReceived
 {
     /**
      * Handle the event.
-     *
-     * @return void
      */
-    public function handle(ResponseReceived|SentSaloonRequest $event)
+    public function handle(ResponseReceived|SentSaloonRequest $event): void
     {
         if (! EventHelper::shouldBeLogged($event)) {
             return;
@@ -24,7 +22,7 @@ class LogResponseReceived
         $formatter = new MessageFormatter(config('http-client-global-logger.format.response'));
         Log::channel(config('http-client-global-logger.channel'))->info($formatter->format(
             EventHelper::getPsrRequest($event),
-            EventHelper::getPsrResponse($event)
+            EventHelper::getPsrResponse($event),
         ));
     }
 }

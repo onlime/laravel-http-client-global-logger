@@ -13,13 +13,16 @@ use Saloon\Laravel\Events\SendingSaloonRequest;
 class LogRequestSending
 {
     /**
-     * Handle the event if the middleware was not added manually.
+     * Handle the event if the HTTP Client global request middleware was not added manually
+     * with HttpClientLogger::addRequestMiddleware(). Always handle it for Saloon requests.
      */
     public function handle(RequestSending|SendingSaloonRequest $event): void
     {
-        if (! HttpClientLogger::requestMiddlewareWasAdded()) {
-            $this->handleEvent($event);
+        if ($event instanceof RequestSending && HttpClientLogger::requestMiddlewareWasAdded()) {
+            return;
         }
+
+        $this->handleEvent($event);
     }
 
     /**

@@ -185,7 +185,7 @@ So, my recommendation: If you need global logging without any extra configuratio
 
   - No obfuscation of query params, e.g. on a POST request to an OAuth2 token endpoint.
 
-  - Obfuscation currently only works in variant 1 or 3 (global logging).
+  - Obfuscation currently only works in variant 1 or 3 (global logging), and only on requests, not yet on response data.
 
 
 ## Testing
