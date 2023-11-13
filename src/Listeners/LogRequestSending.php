@@ -5,28 +5,38 @@ namespace Onlime\LaravelHttpClientGlobalLogger\Listeners;
 use GuzzleHttp\MessageFormatter;
 use Illuminate\Http\Client\Events\RequestSending;
 use Illuminate\Support\Facades\Log;
+use Onlime\LaravelHttpClientGlobalLogger\EventHelper;
 use Onlime\LaravelHttpClientGlobalLogger\HttpClientLogger;
 use Psr\Http\Message\RequestInterface;
+use Saloon\Laravel\Events\SendingSaloonRequest;
 
 class LogRequestSending
 {
     /**
-     * Handle the event if the middleware was not added manually.
+     * Handle the event if the HTTP Client global request middleware was not added manually
+     * with HttpClientLogger::addRequestMiddleware(). Always handle it for Saloon requests.
      */
-    public function handle(RequestSending $event): void
+    public function handle(RequestSending|SendingSaloonRequest $event): void
     {
-        if (! HttpClientLogger::requestMiddlewareWasAdded()) {
-            $this->handleEvent($event);
+        if ($event instanceof RequestSending && HttpClientLogger::requestMiddlewareWasAdded()) {
+            return;
         }
+
+        $this->handleEvent($event);
     }
 
     /**
      * Handle the event.
      */
-    public function handleEvent(RequestSending $event): void
+    public function handleEvent(RequestSending|SendingSaloonRequest $event): void
     {
+        if (! EventHelper::shouldBeLogged($event)) {
+            return;
+        }
+
+        $psrRequest = EventHelper::getPsrRequest($event);
+
         $obfuscate  = config('http-client-global-logger.obfuscate.enabled');
-        $psrRequest = $event->request->toPsrRequest();
 
         if ($obfuscate) {
             $psrRequest = $this->obfuscateHeaders($psrRequest);

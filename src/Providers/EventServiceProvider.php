@@ -7,6 +7,8 @@ use Illuminate\Http\Client\Events\RequestSending;
 use Illuminate\Http\Client\Events\ResponseReceived;
 use Onlime\LaravelHttpClientGlobalLogger\Listeners\LogRequestSending;
 use Onlime\LaravelHttpClientGlobalLogger\Listeners\LogResponseReceived;
+use Saloon\Laravel\Events\SendingSaloonRequest;
+use Saloon\Laravel\Events\SentSaloonRequest;
 
 class EventServiceProvider extends BaseEventServiceProvider
 {
@@ -16,10 +18,19 @@ class EventServiceProvider extends BaseEventServiceProvider
      * @var array
      */
     protected $listen = [
+        // Laravel HTTP Client
         RequestSending::class => [
             LogRequestSending::class,
         ],
         ResponseReceived::class => [
+            LogResponseReceived::class,
+        ],
+
+        // Saloon
+        SendingSaloonRequest::class => [
+            LogRequestSending::class,
+        ],
+        SentSaloonRequest::class => [
             LogResponseReceived::class,
         ],
     ];

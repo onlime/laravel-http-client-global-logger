@@ -1,7 +1,11 @@
 # CHANGELOG
 
-## [v1.1.x (Unreleased)](https://github.com/onlime/laravel-http-client-global-logger/compare/v1.1.0...main)
+## [v1.1.x (Unreleased)](https://github.com/onlime/laravel-http-client-global-logger/compare/v1.1.1...main)
 
+
+## [v1.1.1 (2023-11-13)](https://github.com/onlime/laravel-http-client-global-logger/compare/v1.1.0...v1.1.1)
+
+- Feature | Handle Saloon events by @pascalbaljet in #2 – Can now also log Requests/Responses when using Saloon's `MockClient` by handling `SendingSaloonRequest` and `SentSaloonRequest` Saloon events.
 - Added common OAuth2 keys `access_token,refresh_token,client_secret` to default body obfuscation configuration.
 
 ## [v1.1.0 (2023-11-09)](https://github.com/onlime/laravel-http-client-global-logger/compare/v1.0.2...v1.1.0)
