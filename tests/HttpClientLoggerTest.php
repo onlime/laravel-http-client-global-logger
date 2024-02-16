@@ -44,7 +44,7 @@ it('can add a global request middleware to log the requests', function () {
     Http::fake()->get('https://example.com');
 });
 
-it('can trim the body response', function (array $config, bool $shouldTrim) {
+it('can trim the body response', function (array $config, bool $shouldTrim, bool $addCharsetToContentType) {
     config(['http-client-global-logger.trim_response_body' => $config]);
 
     $logger = setupLogger();
@@ -60,7 +60,9 @@ it('can trim the body response', function (array $config, bool $shouldTrim) {
     })->once();
 
     Http::fake([
-        '*' => Http::response('verylongbody', 200, ['content-type' => 'application/octet-stream']),
+        '*' => Http::response('verylongbody', 200, [
+            'content-type' => 'application/octet-stream'.($addCharsetToContentType ? '; charset=UTF-8' : ''),
+        ]),
     ])->get('https://example.com');
 })->with(
     [
@@ -96,5 +98,6 @@ it('can trim the body response', function (array $config, bool $shouldTrim) {
             ],
             'shouldTrim' => true,
         ],
-    ]
+    ],
+    [true, false]
 );

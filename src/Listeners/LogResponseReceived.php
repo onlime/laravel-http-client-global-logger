@@ -46,12 +46,20 @@ class LogResponseReceived
             return $psrResponse;
         }
 
-        $trimAndLower = fn (string $type) => trim(strtolower($type));
-        $responseContentTypes = array_map($trimAndLower, $psrResponse->getHeader('Content-Type'));
-        $whiteListedContentTypes = array_map($trimAndLower, config('http-client-global-logger.trim_response_body.content_type_whitelist'));
+        // E.g.: application/json; charset=utf-8 => application/json
+        $contentTypeHeader = Str::of($psrResponse->getHeaderLine('Content-Type'))
+            ->before(';')
+            ->trim()
+            ->lower()
+            ->value();
+
+        $whiteListedContentTypes = array_map(
+            fn (string $type) => trim(strtolower($type)),
+            config('http-client-global-logger.trim_response_body.content_type_whitelist')
+        );
 
         // Check if the content type is whitelisted
-        if (count(array_intersect($responseContentTypes, $whiteListedContentTypes)) > 0) {
+        if (in_array($contentTypeHeader, $whiteListedContentTypes)) {
             return $psrResponse;
         }
 
