@@ -114,14 +114,17 @@ return [
     |--------------------------------------------------------------------------
     |
     | Trim response body to a certain length. This is useful when you are logging
-    | large responses and you don't want to fill up your log files.
+    | large responses, and you don't want to fill up your log files.
+    |
+    | NOTE the leading comma in trim_response_body.content_type_whitelist default value:
+    | it's there to whitelist empty content types (e.g. when no Content-Type header is set).
     */
     'trim_response_body' => [
         'enabled' => env('HTTP_CLIENT_GLOBAL_LOGGER_TRIM_RESPONSE_BODY_ENABLED', false),
         'treshold' => env('HTTP_CLIENT_GLOBAL_LOGGER_TRIM_RESPONSE_BODY_TRESHOLD', 200),
         'content_type_whitelist' => explode(',', env(
             'HTTP_CLIENT_GLOBAL_LOGGER_TRIM_RESPONSE_BODY_CONTENT_TYPE_WHITELIST',
-            'application/json'
+            ',application/json'
         )),
     ],
 ];

@@ -9,6 +9,7 @@ use Illuminate\Http\Client\Events\ResponseReceived;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Onlime\LaravelHttpClientGlobalLogger\EventHelper;
+use Psr\Http\Message\MessageInterface;
 use Saloon\Laravel\Events\SentSaloonRequest;
 
 class LogResponseReceived
@@ -32,17 +33,10 @@ class LogResponseReceived
     /**
      * Trim the response body when it's too long.
      */
-    private function trimBody(Response $psrResponse): Response
+    private function trimBody(Response $psrResponse): Response|MessageInterface
     {
         // Check if trimming is enabled
         if (! config('http-client-global-logger.trim_response_body.enabled')) {
-            return $psrResponse;
-        }
-
-        $treshold = config('http-client-global-logger.trim_response_body.treshold');
-
-        // Check if the body size exceeds the treshold
-        if ($psrResponse->getBody()->getSize() <= $treshold) {
             return $psrResponse;
         }
 
@@ -63,8 +57,13 @@ class LogResponseReceived
             return $psrResponse;
         }
 
-        return $psrResponse->withBody(Utils::streamFor(
-            Str::limit($psrResponse->getBody(), $treshold)
-        ));
+        $treshold = config('http-client-global-logger.trim_response_body.treshold');
+
+        // Check if the body size exceeds the treshold
+        return ($psrResponse->getBody()->getSize() <= $treshold)
+            ? $psrResponse
+            : $psrResponse->withBody(Utils::streamFor(
+                Str::limit($psrResponse->getBody(), $treshold)
+            ));
     }
 }

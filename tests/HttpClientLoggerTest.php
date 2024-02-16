@@ -44,7 +44,7 @@ it('can add a global request middleware to log the requests', function () {
     Http::fake()->get('https://example.com');
 });
 
-it('can trim the body response', function (array $config, bool $shouldTrim, bool $addCharsetToContentType) {
+it('can trim the body response', function (array $config, string $contentType, bool $shouldTrim, bool $addCharsetToContentType) {
     config(['http-client-global-logger.trim_response_body' => $config]);
 
     $logger = setupLogger();
@@ -61,7 +61,7 @@ it('can trim the body response', function (array $config, bool $shouldTrim, bool
 
     Http::fake([
         '*' => Http::response('verylongbody', 200, [
-            'content-type' => 'application/octet-stream'.($addCharsetToContentType ? '; charset=UTF-8' : ''),
+            'Content-Type' => $contentType.($addCharsetToContentType ? '; charset=UTF-8' : ''),
         ]),
     ])->get('https://example.com');
 })->with(
@@ -72,6 +72,7 @@ it('can trim the body response', function (array $config, bool $shouldTrim, bool
                 'treshold' => 10,
                 'content_type_whitelist' => ['application/json'],
             ],
+            'contentType' => 'application/octet-stream',
             'shouldTrim' => false,
         ],
         'below_treshold' => [
@@ -80,6 +81,7 @@ it('can trim the body response', function (array $config, bool $shouldTrim, bool
                 'treshold' => 20,
                 'content_type_whitelist' => ['application/json'],
             ],
+            'contentType' => 'application/octet-stream',
             'shouldTrim' => false,
         ],
         'content_type_whitelisted' => [
@@ -88,6 +90,7 @@ it('can trim the body response', function (array $config, bool $shouldTrim, bool
                 'treshold' => 10,
                 'content_type_whitelist' => ['application/octet-stream'],
             ],
+            'contentType' => 'application/octet-stream',
             'shouldTrim' => false,
         ],
         'trim' => [
@@ -96,7 +99,26 @@ it('can trim the body response', function (array $config, bool $shouldTrim, bool
                 'treshold' => 10,
                 'content_type_whitelist' => ['application/json'],
             ],
+            'contentType' => 'application/octet-stream',
             'shouldTrim' => true,
+        ],
+        'no_content_type_trim' => [
+            'config' => [
+                'enabled' => true,
+                'treshold' => 10,
+                'content_type_whitelist' => ['application/octet-stream'],
+            ],
+            'contentType' => '',
+            'shouldTrim' => true,
+        ],
+        'no_content_type_whitelisted' => [
+            'config' => [
+                'enabled' => true,
+                'treshold' => 10,
+                'content_type_whitelist' => ['', 'application/octet-stream'],
+            ],
+            'contentType' => '',
+            'shouldTrim' => false,
         ],
     ],
     [true, false]
