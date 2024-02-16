@@ -5,6 +5,7 @@
 ## [v1.1.2 (2024-02-16)](https://github.com/onlime/laravel-http-client-global-logger/compare/v1.1.1...v1.1.2)
 
 - Feature | Support for trimming the response body by @pascalbaljet in #3
+- Laravel 11 support
 
 ## [v1.1.1 (2023-11-13)](https://github.com/onlime/laravel-http-client-global-logger/compare/v1.1.0...v1.1.1)
 
@@ -22,13 +23,13 @@
 
 ## [v1.0.1 (2023-02-26)](https://github.com/onlime/laravel-http-client-global-logger/compare/v1.0.0...v1.0.1)
 
+- Laravel 10 support, Require PHP 8.1
 - Drop Laravel 8 / PHP 8.0 support
 - Integrated `laravel/pint` as dev requirement for PHP style fixing
-- Support Laravel 10
 
 ## [v1.0.0 (2022-02-10)](https://github.com/onlime/laravel-http-client-global-logger/compare/v0.9.1...v1.0.0)
 
-- Support Laravel 9
+- Laravel 9 support
 
 ## [v0.9.1 (2022-02-10)](https://github.com/onlime/laravel-http-client-global-logger/compare/v0.9...v0.9.1)
 
