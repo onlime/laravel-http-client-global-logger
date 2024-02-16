@@ -36,10 +36,10 @@ You may override its configuration in your `.env` - the following environment va
 - `HTTP_CLIENT_GLOBAL_LOGGER_OBFUSCATE_ENABLED` (bool)
 - `HTTP_CLIENT_GLOBAL_LOGGER_OBFUSCATE_REPLACEMENT` (string)
 - `HTTP_CLIENT_GLOBAL_LOGGER_TRIM_RESPONSE_BODY_ENABLED` (bool)
-- `HTTP_CLIENT_GLOBAL_LOGGER_TRIM_RESPONSE_BODY_TRESHOLD` (int)
+- `HTTP_CLIENT_GLOBAL_LOGGER_TRIM_RESPONSE_BODY_LIMIT` (int)
 - `HTTP_CLIENT_GLOBAL_LOGGER_TRIM_RESPONSE_BODY_CONTENT_TYPE_WHITELIST` (string)
 
-(look into `config/http-client-global-logger.php` for further configuration and explanation)
+(look into `config/http-client-global-logger.php` for defaults, further configuration, and explanation)
 
 ## Features
 

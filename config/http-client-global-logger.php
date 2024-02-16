@@ -121,7 +121,7 @@ return [
     */
     'trim_response_body' => [
         'enabled' => env('HTTP_CLIENT_GLOBAL_LOGGER_TRIM_RESPONSE_BODY_ENABLED', false),
-        'treshold' => env('HTTP_CLIENT_GLOBAL_LOGGER_TRIM_RESPONSE_BODY_TRESHOLD', 200),
+        'limit' => env('HTTP_CLIENT_GLOBAL_LOGGER_TRIM_RESPONSE_BODY_LIMIT', 200),
         'content_type_whitelist' => explode(',', env(
             'HTTP_CLIENT_GLOBAL_LOGGER_TRIM_RESPONSE_BODY_CONTENT_TYPE_WHITELIST',
             ',application/json'

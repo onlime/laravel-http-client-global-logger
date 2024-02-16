@@ -69,16 +69,16 @@ it('can trim the body response', function (array $config, string $contentType, b
         'disabled' =>  [
             'config' => [
                 'enabled' => false,
-                'treshold' => 10,
+                'limit' => 10,
                 'content_type_whitelist' => ['application/json'],
             ],
             'contentType' => 'application/octet-stream',
             'shouldTrim' => false,
         ],
-        'below_treshold' => [
+        'below_limit' => [
             'config' => [
                 'enabled' => true,
-                'treshold' => 20,
+                'limit' => 20,
                 'content_type_whitelist' => ['application/json'],
             ],
             'contentType' => 'application/octet-stream',
@@ -87,7 +87,7 @@ it('can trim the body response', function (array $config, string $contentType, b
         'content_type_whitelisted' => [
             'config' => [
                 'enabled' => true,
-                'treshold' => 10,
+                'limit' => 10,
                 'content_type_whitelist' => ['application/octet-stream'],
             ],
             'contentType' => 'application/octet-stream',
@@ -96,7 +96,7 @@ it('can trim the body response', function (array $config, string $contentType, b
         'trim' => [
             'config' => [
                 'enabled' => true,
-                'treshold' => 10,
+                'limit' => 10,
                 'content_type_whitelist' => ['application/json'],
             ],
             'contentType' => 'application/octet-stream',
@@ -105,7 +105,7 @@ it('can trim the body response', function (array $config, string $contentType, b
         'no_content_type_trim' => [
             'config' => [
                 'enabled' => true,
-                'treshold' => 10,
+                'limit' => 10,
                 'content_type_whitelist' => ['application/octet-stream'],
             ],
             'contentType' => '',
@@ -114,7 +114,7 @@ it('can trim the body response', function (array $config, string $contentType, b
         'no_content_type_whitelisted' => [
             'config' => [
                 'enabled' => true,
-                'treshold' => 10,
+                'limit' => 10,
                 'content_type_whitelist' => ['', 'application/octet-stream'],
             ],
             'contentType' => '',

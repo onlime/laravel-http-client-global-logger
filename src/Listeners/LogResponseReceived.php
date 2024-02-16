@@ -57,13 +57,13 @@ class LogResponseReceived
             return $psrResponse;
         }
 
-        $treshold = config('http-client-global-logger.trim_response_body.treshold');
+        $limit = config('http-client-global-logger.trim_response_body.limit');
 
-        // Check if the body size exceeds the treshold
-        return ($psrResponse->getBody()->getSize() <= $treshold)
+        // Check if the body size exceeds the limit
+        return ($psrResponse->getBody()->getSize() <= $limit)
             ? $psrResponse
             : $psrResponse->withBody(Utils::streamFor(
-                Str::limit($psrResponse->getBody(), $treshold)
+                Str::limit($psrResponse->getBody(), $limit)
             ));
     }
 }
