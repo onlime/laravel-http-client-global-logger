@@ -35,8 +35,11 @@ You may override its configuration in your `.env` - the following environment va
 - `HTTP_CLIENT_GLOBAL_LOGGER_RESPONSE_FORMAT` (string)
 - `HTTP_CLIENT_GLOBAL_LOGGER_OBFUSCATE_ENABLED` (bool)
 - `HTTP_CLIENT_GLOBAL_LOGGER_OBFUSCATE_REPLACEMENT` (string)
+- `HTTP_CLIENT_GLOBAL_LOGGER_TRIM_RESPONSE_BODY_ENABLED` (bool)
+- `HTTP_CLIENT_GLOBAL_LOGGER_TRIM_RESPONSE_BODY_LIMIT` (int)
+- `HTTP_CLIENT_GLOBAL_LOGGER_TRIM_RESPONSE_BODY_CONTENT_TYPE_WHITELIST` (string)
 
-(look into `config/http-client-global-logger.php` for further configuration and explanation)
+(look into `config/http-client-global-logger.php` for defaults, further configuration, and explanation)
 
 ## Features
 
@@ -45,6 +48,8 @@ Using the logger will log both the request and response of an external HTTP requ
 - Multi-line log records that contain full request/response information (including all headers and body)
 - Logging into separate logfile `http-client.log`. You're free to override this and use your own logging channel or just log to a different logfile.
 - Full support of [Guzzle MessageFormatter](https://github.com/guzzle/guzzle/blob/master/src/MessageFormatter.php) variable substitutions for highly customized log messages.
+- Basic obfuscation of credentials in HTTP Client requests
+- Trimming of response body content to a certain length with support for Content-Type whitelisting
 - **Variant 1: Global logging** (default)
   - Zero-configuration: Global logging is enabled by default in this package.
   - Simple and performant implementation using `RequestSending` / `ResponseReceived` event listeners
@@ -166,6 +171,7 @@ Both packages provide a different feature set and have those advantages:
   - auto-configured log channel `http-client` to log to a separate `http-client.log` file
   - Full support of [Guzzle MessageFormatter](https://github.com/guzzle/guzzle/blob/master/src/MessageFormatter.php) variable substitutions for highly customized log messages.
   - basic obfuscation of credentials in HTTP Client requests
+  - trimming of response body content
 - [bilfeldt/laravel-http-client-logger](https://github.com/bilfeldt/laravel-http-client-logger)
   - conditional logging using `logWhen($condition)`
   - filtering of logs by HTTP response codes
