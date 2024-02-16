@@ -2,20 +2,28 @@
 
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use Mockery\MockInterface;
 use Onlime\LaravelHttpClientGlobalLogger\HttpClientLogger;
 use Psr\Http\Message\RequestInterface;
 use Psr\Log\LoggerInterface;
+
+function setupLogger(): MockInterface
+{
+    HttpClientLogger::addRequestMiddleware();
+
+    $logger = Mockery::mock(LoggerInterface::class);
+
+    Log::shouldReceive('channel')->with('http-client')->andReturn($logger);
+
+    return $logger;
+}
 
 it('can add a global request middleware to log the requests', function () {
     Http::globalRequestMiddleware(
         fn (RequestInterface $psrRequest) => $psrRequest->withHeader('X-Test', 'test')
     );
 
-    HttpClientLogger::addRequestMiddleware();
-
-    $logger = Mockery::mock(LoggerInterface::class);
-
-    Log::shouldReceive('channel')->with('http-client')->andReturn($logger);
+    $logger = setupLogger();
 
     $logger->shouldReceive('info')->withArgs(function ($message) {
         expect($message)
@@ -39,11 +47,7 @@ it('can add a global request middleware to log the requests', function () {
 it('can trim the body response', function (array $config, bool $shouldTrim) {
     config(['http-client-global-logger.trim_response_body' => $config]);
 
-    HttpClientLogger::addRequestMiddleware();
-
-    $logger = Mockery::mock(LoggerInterface::class);
-
-    Log::shouldReceive('channel')->with('http-client')->andReturn($logger);
+    $logger = setupLogger();
 
     $logger->shouldReceive('info')->withArgs(function ($message) {
         expect($message)->toContain('REQUEST: GET https://example.com');
