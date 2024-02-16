@@ -34,9 +34,9 @@
     },
     "require-dev": {
         "laravel/framework": "^10.0",
-        "laravel/pint": "^1.10",
+        "laravel/pint": "^1.13",
         "orchestra/testbench": "^8.8",
-        "pestphp/pest": "^2.20",
+        "pestphp/pest": "^2.33",
         "pestphp/pest-plugin-arch": "^2.0",
         "pestphp/pest-plugin-laravel": "^2.0",
         "saloonphp/laravel-http-sender": "^2.0",

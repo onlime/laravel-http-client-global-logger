@@ -1,7 +1,10 @@
 # CHANGELOG
 
-## [v1.1.x (Unreleased)](https://github.com/onlime/laravel-http-client-global-logger/compare/v1.1.1...main)
+## [v1.1.x (Unreleased)](https://github.com/onlime/laravel-http-client-global-logger/compare/v1.1.2...main)
 
+## [v1.1.2 (2024-02-16)](https://github.com/onlime/laravel-http-client-global-logger/compare/v1.1.1...v1.1.2)
+
+- Feature | Support for trimming the response body by @pascalbaljet in #3
 
 ## [v1.1.1 (2023-11-13)](https://github.com/onlime/laravel-http-client-global-logger/compare/v1.1.0...v1.1.1)
 
