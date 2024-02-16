@@ -107,4 +107,21 @@ return [
             'pass,password,token,apikey,access_token,refresh_token,client_secret'
         )),
     ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Trim response body
+    |--------------------------------------------------------------------------
+    |
+    | Trim response body to a certain length. This is useful when you are logging
+    | large responses and you don't want to fill up your log files.
+    */
+    'trim_response_body' => [
+        'enabled' => env('HTTP_CLIENT_GLOBAL_LOGGER_TRIM_RESPONSE_BODY_ENABLED', false),
+        'treshold' => env('HTTP_CLIENT_GLOBAL_LOGGER_TRIM_RESPONSE_BODY_TRESHOLD', 200),
+        'content_type_whitelist' => explode(',', env(
+            'HTTP_CLIENT_GLOBAL_LOGGER_TRIM_RESPONSE_BODY_CONTENT_TYPE_WHITELIST',
+            'application/json'
+        )),
+    ],
 ];

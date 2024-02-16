@@ -35,3 +35,62 @@ it('can add a global request middleware to log the requests', function () {
 
     Http::fake()->get('https://example.com');
 });
+
+it('can trim the body response', function (array $config, bool $shouldTrim) {
+    config(['http-client-global-logger.trim_response_body' => $config]);
+
+    HttpClientLogger::addRequestMiddleware();
+
+    $logger = Mockery::mock(LoggerInterface::class);
+
+    Log::shouldReceive('channel')->with('http-client')->andReturn($logger);
+
+    $logger->shouldReceive('info')->withArgs(function ($message) {
+        expect($message)->toContain('REQUEST: GET https://example.com');
+        return true;
+    })->once();
+
+    $logger->shouldReceive('info')->withArgs(function ($message) use ($shouldTrim) {
+        expect($message)->toContain($shouldTrim ? 'verylongbo...' : 'verylongbody');
+        return true;
+    })->once();
+
+    Http::fake([
+        '*' => Http::response('verylongbody', 200, ['content-type' => 'application/octet-stream']),
+    ])->get('https://example.com');
+})->with(
+    [
+        'disabled' =>  [
+            'config' => [
+                'enabled' => false,
+                'treshold' => 10,
+                'content_type_whitelist' => ['application/json'],
+            ],
+            'shouldTrim' => false,
+        ],
+        'below_treshold' => [
+            'config' => [
+                'enabled' => true,
+                'treshold' => 20,
+                'content_type_whitelist' => ['application/json'],
+            ],
+            'shouldTrim' => false,
+        ],
+        'content_type_whitelisted' => [
+            'config' => [
+                'enabled' => true,
+                'treshold' => 10,
+                'content_type_whitelist' => ['application/octet-stream'],
+            ],
+            'shouldTrim' => false,
+        ],
+        'trim' => [
+            'config' => [
+                'enabled' => true,
+                'treshold' => 10,
+                'content_type_whitelist' => ['application/json'],
+            ],
+            'shouldTrim' => true,
+        ],
+    ]
+);
