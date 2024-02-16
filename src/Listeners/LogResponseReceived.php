@@ -38,20 +38,19 @@ class LogResponseReceived
             return $psrResponse;
         }
 
-        $trimAndLower = fn (string $type) => trim(strtolower($type));
+        $treshold = config('http-client-global-logger.trim_response_body.treshold');
 
+        // Check if the body size exceeds the treshold
+        if ($psrResponse->getBody()->getSize() <= $treshold) {
+            return $psrResponse;
+        }
+
+        $trimAndLower = fn (string $type) => trim(strtolower($type));
         $responseContentTypes = array_map($trimAndLower, $psrResponse->getHeader('Content-Type'));
         $whiteListedContentTypes = array_map($trimAndLower, config('http-client-global-logger.trim_response_body.content_type_whitelist'));
 
         // Check if the content type is whitelisted
         if (count(array_intersect($responseContentTypes, $whiteListedContentTypes)) > 0) {
-            return $psrResponse;
-        }
-
-        $treshold = config('http-client-global-logger.trim_response_body.treshold');
-
-        // Check if the body size exceeds the treshold
-        if ($psrResponse->getBody()->getSize() <= $treshold) {
             return $psrResponse;
         }
 
