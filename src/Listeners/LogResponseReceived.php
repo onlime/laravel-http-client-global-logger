@@ -7,6 +7,7 @@ use GuzzleHttp\Psr7\Response;
 use GuzzleHttp\Psr7\Utils;
 use Illuminate\Http\Client\Events\ResponseReceived;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 use Onlime\LaravelHttpClientGlobalLogger\EventHelper;
 use Saloon\Laravel\Events\SentSaloonRequest;
 
@@ -55,7 +56,7 @@ class LogResponseReceived
         }
 
         return $psrResponse->withBody(Utils::streamFor(
-            substr($psrResponse->getBody(), 0, $treshold).'...'
+            Str::limit($psrResponse->getBody(), $treshold)
         ));
     }
 }
