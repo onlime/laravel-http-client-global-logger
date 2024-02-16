@@ -4,7 +4,7 @@ namespace Onlime\LaravelHttpClientGlobalLogger\Listeners;
 
 use GuzzleHttp\MessageFormatter;
 use GuzzleHttp\Psr7\Response;
-use GuzzleHttp\Psr7\Stream;
+use GuzzleHttp\Psr7\Utils;
 use Illuminate\Http\Client\Events\ResponseReceived;
 use Illuminate\Support\Facades\Log;
 use Onlime\LaravelHttpClientGlobalLogger\EventHelper;
@@ -55,10 +55,8 @@ class LogResponseReceived
             return $psrResponse;
         }
 
-        $resource = \fopen('php://memory', 'r+');
-        \fwrite($resource, substr($psrResponse->getBody()->__toString(), 0, $treshold).'...');
-        \fseek($resource, 0);
-
-        return $psrResponse->withBody(new Stream($resource));
+        return $psrResponse->withBody(Utils::streamFor(
+            substr($psrResponse->getBody(), 0, $treshold).'...'
+        ));
     }
 }
