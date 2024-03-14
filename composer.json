@@ -39,7 +39,8 @@
         "pestphp/pest-plugin-arch": "^2.0",
         "pestphp/pest-plugin-laravel": "^2.0",
         "saloonphp/laravel-http-sender": "^2.0|^3.0",
-        "saloonphp/laravel-plugin": "^3.0"
+        "saloonphp/laravel-plugin": "^3.0",
+        "spatie/invade": "^2.0"
     },
     "suggest": {
         "saloonphp/laravel-plugin": "To support logging of Saloon events (^3.0)"

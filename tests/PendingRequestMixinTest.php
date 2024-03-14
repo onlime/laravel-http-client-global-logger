@@ -2,6 +2,7 @@
 
 use GuzzleHttp\HandlerStack;
 use Illuminate\Http\Client\PendingRequest;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Http;
 use Onlime\LaravelHttpClientGlobalLogger\Mixins\PendingRequestMixin;
 
@@ -15,11 +16,12 @@ it('rebuilds the guzzle handler stack to include the logger middleware at the bo
     $handler = $pendingRequest->getOptions()['handler'];
     expect($handler)->toBeInstanceOf(HandlerStack::class);
 
-    // String representation of the stack
-    $stack = $handler->__toString();
+    // We need to invade the HandlerStack to access the stack property
+    $stack = invade($handler)->stack;
+    // The first key is the middlware, and the second key is the name of the middleware
+    $middlewareNames = Arr::pluck($stack, 1);
 
-    // It adds a logger for each format (see config('http-client-global-logger.format'))
-    expect($stack)->toContain("Name: 'http-client-global-logger-0'")
-        ->and($stack)->toContain("Name: 'http-client-global-logger-1'")
-        ->and($stack)->not->toContain("Name: 'http-client-global-logger-2'");
+    expect($middlewareNames)->toContain('http-client-global-logger-0')
+        ->and($middlewareNames)->toContain('http-client-global-logger-1')
+        ->and($middlewareNames)->not->toContain('http-client-global-logger-2');
 });
