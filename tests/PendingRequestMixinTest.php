@@ -16,8 +16,8 @@ it('rebuilds the guzzle handler stack to include the logger middleware at the bo
 
     // We need to invade the HandlerStack to access the stack property or findByName method
     expect($handler)->toBeInstanceOf(HandlerStack::class)
-        ->and(invade($handler)->findByName('http-client-global-logger-0'))->toBeInt()
-        ->and(invade($handler)->findByName('http-client-global-logger-1'))->toBeInt()
-        ->and(fn () => invade($handler)->findByName('http-client-global-logger-2'))
+        ->and(invade($handler)->findByName('http-client-global-logger-request'))->toBeInt()
+        ->and(invade($handler)->findByName('http-client-global-logger-response'))->toBeInt()
+        ->and(fn () => invade($handler)->findByName('http-client-global-logger-0'))
         ->toThrow(\InvalidArgumentException::class);
 });

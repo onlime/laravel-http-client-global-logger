@@ -22,10 +22,6 @@ class PendingRequestMixin
                 return $this;
             }
 
-            $messageFormats = array_values(
-                config('http-client-global-logger.format')
-            );
-
             $stack = $this->buildHandlerStack();
 
             /** @var Logger $logger */
@@ -33,7 +29,8 @@ class PendingRequestMixin
             if (! is_null($name)) {
                 $logger = $logger->withName($name);
             }
-            foreach ($messageFormats as $key => $format) {
+
+            foreach (config('http-client-global-logger.format') as $key => $format) {
                 // We'll use unshift instead of push, to add the middleware to the bottom of the stack, not the top
                 $stack->unshift(
                     Middleware::log($logger, new MessageFormatter($format)),
