@@ -1,6 +1,16 @@
 # CHANGELOG
 
-## [v1.1.x (Unreleased)](https://github.com/onlime/laravel-http-client-global-logger/compare/v1.1.2...main)
+## [v1.1.x (Unreleased)](https://github.com/onlime/laravel-http-client-global-logger/compare/v1.1.3...main)
+
+## [v1.1.3 (2024-03-14)](https://github.com/onlime/laravel-http-client-global-logger/compare/v1.1.2...v1.1.3)
+
+- Added GitHub Actions workflow, Improve test suite by @pascalbaljet in #4
+- Bumped `saloonphp/laravel-http-sender` dependency to support Laravel 11
+- Bumped Laravel 10 requirement to `^10.32` as it requires `getGlobalMiddleware()`
+- Removed unneeded `guzzlehttp/guzzle` dependency
+- Streamlined `EventServiceProvider` into `ServiceProvider`
+- Added tests for `EventHelper`, `PendingRequestMixin` and `ServiceProvider`
+- The added Guzzle middleware now has a name for easier debugging and testing
 
 ## [v1.1.2 (2024-02-16)](https://github.com/onlime/laravel-http-client-global-logger/compare/v1.1.1...v1.1.2)
 

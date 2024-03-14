@@ -3,6 +3,7 @@
 [![Latest Version on Packagist](https://img.shields.io/packagist/v/onlime/laravel-http-client-global-logger.svg)](https://packagist.org/packages/onlime/laravel-http-client-global-logger)
 [![Packagist Downloads](https://img.shields.io/packagist/dt/onlime/laravel-http-client-global-logger.svg)](https://packagist.org/packages/onlime/laravel-http-client-global-logger)
 [![PHP from Packagist](https://img.shields.io/packagist/php-v/onlime/laravel-http-client-global-logger.svg)](https://packagist.org/packages/onlime/laravel-http-client-global-logger)
+[![Build Status](https://github.com/onlime/laravel-http-client-global-logger/actions/workflows/ci.yml/badge.svg)](https://github.com/onlime/laravel-http-client-global-logger/actions/workflows/ci.yml)
 [![GitHub License](https://img.shields.io/github/license/onlime/laravel-http-client-global-logger.svg)](https://github.com/onlime/laravel-http-client-global-logger/blob/main/LICENSE)
 
 A super simple global logger for the [Laravel HTTP Client](https://laravel.com/docs/http-client).
