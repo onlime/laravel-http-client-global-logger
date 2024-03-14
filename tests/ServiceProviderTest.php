@@ -64,6 +64,8 @@ it('configures the log channel', function () {
 });
 
 it('can register the mixin on the PendingRequest class', function (bool $mixin) {
+    PendingRequest::flushMacros();
+
     config([
         'http-client-global-logger.mixin' => $mixin,
     ]);
