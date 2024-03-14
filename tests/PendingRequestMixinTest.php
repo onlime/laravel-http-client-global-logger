@@ -15,7 +15,11 @@ it('rebuilds the guzzle handler stack to include the logger middleware at the bo
     $handler = $pendingRequest->getOptions()['handler'];
     expect($handler)->toBeInstanceOf(HandlerStack::class);
 
+    // String representation of the stack
+    $stack = $handler->__toString();
+
     // It adds a logger for each format (see config('http-client-global-logger.format'))
-    expect($handler->hasHandler('http-client-global-logger-0'))->toBeTrue()
-        ->and($handler->hasHandler('http-client-global-logger-1'))->toBeTrue();
+    expect($stack)->toContain("Name: 'http-client-global-logger-0'")
+        ->and($stack)->toContain("Name: 'http-client-global-logger-1'")
+        ->and($stack)->not->toContain("Name: 'http-client-global-logger-2'");
 });
