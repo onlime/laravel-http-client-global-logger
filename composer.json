@@ -27,8 +27,7 @@
     ],
     "require": {
         "php": "^8.1",
-        "guzzlehttp/guzzle": "^7.6",
-        "illuminate/http": "^10.0|^11.0",
+        "illuminate/http": "^10.32|^11.0",
         "illuminate/support": "^10.0|^11.0",
         "monolog/monolog": "^3.0"
     },
@@ -39,8 +38,9 @@
         "pestphp/pest": "^2.33",
         "pestphp/pest-plugin-arch": "^2.0",
         "pestphp/pest-plugin-laravel": "^2.0",
-        "saloonphp/laravel-http-sender": "^2.0",
-        "saloonphp/laravel-plugin": "^3.0"
+        "saloonphp/laravel-http-sender": "^2.0|^3.0",
+        "saloonphp/laravel-plugin": "^3.0",
+        "spatie/invade": "^2.0"
     },
     "suggest": {
         "saloonphp/laravel-plugin": "To support logging of Saloon events (^3.0)"

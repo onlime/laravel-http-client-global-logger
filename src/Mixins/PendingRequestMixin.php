@@ -33,10 +33,11 @@ class PendingRequestMixin
             if (! is_null($name)) {
                 $logger = $logger->withName($name);
             }
-            foreach ($messageFormats as $format) {
+            foreach ($messageFormats as $key => $format) {
                 // We'll use unshift instead of push, to add the middleware to the bottom of the stack, not the top
                 $stack->unshift(
-                    Middleware::log($logger, new MessageFormatter($format))
+                    Middleware::log($logger, new MessageFormatter($format)),
+                    'http-client-global-logger-'.$key
                 );
             }
 

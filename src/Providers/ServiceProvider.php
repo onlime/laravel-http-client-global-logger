@@ -2,10 +2,17 @@
 
 namespace Onlime\LaravelHttpClientGlobalLogger\Providers;
 
+use Illuminate\Http\Client\Events\RequestSending;
+use Illuminate\Http\Client\Events\ResponseReceived;
 use Illuminate\Http\Client\PendingRequest;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\ServiceProvider as BaseServiceProvider;
 use Monolog\Handler\StreamHandler;
+use Onlime\LaravelHttpClientGlobalLogger\Listeners\LogRequestSending;
+use Onlime\LaravelHttpClientGlobalLogger\Listeners\LogResponseReceived;
 use Onlime\LaravelHttpClientGlobalLogger\Mixins\PendingRequestMixin;
+use Saloon\Laravel\Events\SendingSaloonRequest;
+use Saloon\Laravel\Events\SentSaloonRequest;
 
 class ServiceProvider extends BaseServiceProvider
 {
@@ -18,15 +25,26 @@ class ServiceProvider extends BaseServiceProvider
 
         if (config('http-client-global-logger.enabled') &&
             ! config('http-client-global-logger.mixin')) {
-            $this->app->register(EventServiceProvider::class);
+            $this->registerEventListeners();
         }
+    }
+
+    private function registerEventListeners(): void
+    {
+        // Laravel HTTP Client
+        Event::listen(RequestSending::class, LogRequestSending::class);
+        Event::listen(ResponseReceived::class, LogResponseReceived::class);
+
+        // Saloon
+        Event::listen(SendingSaloonRequest::class, LogRequestSending::class);
+        Event::listen(SentSaloonRequest::class, LogResponseReceived::class);
     }
 
     public function boot()
     {
         $this->publishes([
             $this->configFileLocation() => config_path('http-client-global-logger.php'),
-        ], 'config');
+        ], 'http-client-global-logger');
 
         $channel = config('http-client-global-logger.channel');
         if (! array_key_exists($channel, config('logging.channels'))) {
