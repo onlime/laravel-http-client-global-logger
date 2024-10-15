@@ -62,7 +62,7 @@ class ServiceProvider extends BaseServiceProvider
 
         // Mixin variant of using Http:log($name) instead of global logging
         if (config('http-client-global-logger.mixin')) {
-            PendingRequest::mixin(new PendingRequestMixin());
+            PendingRequest::mixin(new PendingRequestMixin);
         }
     }
 

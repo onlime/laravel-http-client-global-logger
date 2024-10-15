@@ -2,7 +2,6 @@
 
 use GuzzleHttp\HandlerStack;
 use Illuminate\Http\Client\PendingRequest;
-use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Http;
 use Onlime\LaravelHttpClientGlobalLogger\Mixins\PendingRequestMixin;
 
