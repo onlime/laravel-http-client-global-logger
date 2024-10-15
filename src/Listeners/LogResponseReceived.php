@@ -24,37 +24,43 @@ class LogResponseReceived
         }
 
         $formatter = new MessageFormatter(config('http-client-global-logger.format.response'));
+        $psrRequest = EventHelper::getPsrRequest($event);
         Log::channel(config('http-client-global-logger.channel'))->info($formatter->format(
-            EventHelper::getPsrRequest($event),
-            $this->trimBody(EventHelper::getPsrResponse($event))
+            $psrRequest,
+            $this->trimBody(
+                EventHelper::getPsrResponse($event),
+                $psrRequest->hasHeader('X-Global-Logger-Trim-Always')
+            )
         ));
     }
 
     /**
      * Trim the response body when it's too long.
      */
-    private function trimBody(Response $psrResponse): Response|MessageInterface
+    private function trimBody(Response $psrResponse, bool $trimAlways = false): Response|MessageInterface
     {
         // Check if trimming is enabled
         if (! config('http-client-global-logger.trim_response_body.enabled')) {
             return $psrResponse;
         }
 
-        // E.g.: application/json; charset=utf-8 => application/json
-        $contentTypeHeader = Str::of($psrResponse->getHeaderLine('Content-Type'))
-            ->before(';')
-            ->trim()
-            ->lower()
-            ->value();
+        if (! $trimAlways) {
+            // E.g.: application/json; charset=utf-8 => application/json
+            $contentTypeHeader = Str::of($psrResponse->getHeaderLine('Content-Type'))
+                ->before(';')
+                ->trim()
+                ->lower()
+                ->value();
 
-        $whiteListedContentTypes = array_map(
-            fn (string $type) => trim(strtolower($type)),
-            config('http-client-global-logger.trim_response_body.content_type_whitelist')
-        );
+            $whiteListedContentTypes = array_map(
+                fn (string $type) => trim(strtolower($type)),
+                config('http-client-global-logger.trim_response_body.content_type_whitelist')
+            );
 
-        // Check if the content type is whitelisted
-        if (in_array($contentTypeHeader, $whiteListedContentTypes)) {
-            return $psrResponse;
+            // Check if the content type is whitelisted
+            if (in_array($contentTypeHeader, $whiteListedContentTypes)) {
+                return $psrResponse;
+            }
         }
 
         $limit = config('http-client-global-logger.trim_response_body.limit');

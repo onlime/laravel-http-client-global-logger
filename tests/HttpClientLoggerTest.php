@@ -44,7 +44,7 @@ it('can add a global request middleware to log the requests', function () {
     Http::fake()->get('https://example.com');
 });
 
-it('can trim the body response', function (array $config, string $contentType, bool $shouldTrim, bool $addCharsetToContentType) {
+it('can trim the response body', function (array $config, string $contentType, bool $shouldTrim, bool $addCharsetToContentType) {
     config(['http-client-global-logger.trim_response_body' => $config]);
 
     $logger = setupLogger();
@@ -126,3 +126,30 @@ it('can trim the body response', function (array $config, string $contentType, b
         'without-charset' => ['addCharsetToContentType' => false],
     ]
 );
+
+it('always trims the response body when special header is set on request', function (bool $withHeader) {
+    config(['http-client-global-logger.trim_response_body' => [
+        'enabled' => true,
+        'limit' => 10,
+        'content_type_whitelist' => ['application/json'],
+    ]]);
+
+    $logger = setupLogger();
+
+    $logger->shouldReceive('info')->withArgs(function ($message) {
+        expect($message)->toContain('REQUEST: GET https://example.com');
+        return true;
+    })->once();
+
+    $logger->shouldReceive('info')->withArgs(function ($message) use ($withHeader) {
+        expect($message)->toContain($withHeader ? 'verylongbo...' : 'verylongbody');
+        return true;
+    })->once();
+
+    Http::fake([
+        '*' => Http::response('verylongbody', 200, [
+            'Content-Type' => 'application/json',
+        ]),
+    ])->withHeader($withHeader ? 'X-Global-Logger-Trim-Always' : 'X-Dummy', 'true')
+        ->get('https://example.com');
+})->with([true, false]);

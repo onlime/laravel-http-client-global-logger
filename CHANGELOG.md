@@ -4,6 +4,7 @@
 
 ## [v1.2.0 (2024-10-15)](https://github.com/onlime/laravel-http-client-global-logger/compare/v1.1.3...v1.2.0)
 
+- Feature | You can now enforce trimming of response body by setting a `X-Global-Logger-Trim-Always` request header, which will ignore the Content-Type whitelisting.
 - Drop PHP 8.1 support
 - Upgrade pestphp/pest to v3
 

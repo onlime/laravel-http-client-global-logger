@@ -49,8 +49,9 @@ Using the logger will log both the request and response of an external HTTP requ
 - Multi-line log records that contain full request/response information (including all headers and body)
 - Logging into separate logfile `http-client.log`. You're free to override this and use your own logging channel or just log to a different logfile.
 - Full support of [Guzzle MessageFormatter](https://github.com/guzzle/guzzle/blob/master/src/MessageFormatter.php) variable substitutions for highly customized log messages.
-- Basic obfuscation of credentials in HTTP Client requests
-- Trimming of response body content to a certain length with support for Content-Type whitelisting
+- Basic obfuscation of credentials in HTTP Client requests (both by header or body keys)
+- Trimming of response body content to a certain length with support for `Content-Type` whitelisting
+- Enforce trimming of response body content by setting a `X-Global-Logger-Trim-Always` request header, which will ignore the whitelisting.
 - **Variant 1: Global logging** (default)
   - Zero-configuration: Global logging is enabled by default in this package.
   - Simple and performant implementation using `RequestSending` / `ResponseReceived` event listeners

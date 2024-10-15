@@ -118,6 +118,9 @@ return [
     |
     | NOTE the leading comma in trim_response_body.content_type_whitelist default value:
     | it's there to whitelist empty content types (e.g. when no Content-Type header is set).
+    |
+    | The content type whitelisting can be ignored by setting the following header in the
+    | request: X-Global-Logger-Trim-Always (set it to any value, e.g. 'true').
     */
     'trim_response_body' => [
         'enabled' => env('HTTP_CLIENT_GLOBAL_LOGGER_TRIM_RESPONSE_BODY_ENABLED', false),
