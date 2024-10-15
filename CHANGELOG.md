@@ -1,6 +1,11 @@
 # CHANGELOG
 
-## [v1.1.x (Unreleased)](https://github.com/onlime/laravel-http-client-global-logger/compare/v1.1.3...main)
+## [v1.2.x (Unreleased)](https://github.com/onlime/laravel-http-client-global-logger/compare/v1.2.0...main)
+
+## [v1.2.0 (2024-10-15)](https://github.com/onlime/laravel-http-client-global-logger/compare/v1.1.3...v1.2.0)
+
+- Drop PHP 8.1 support
+- Upgrade pestphp/pest to v3
 
 ## [v1.1.3 (2024-03-14)](https://github.com/onlime/laravel-http-client-global-logger/compare/v1.1.2...v1.1.3)
 

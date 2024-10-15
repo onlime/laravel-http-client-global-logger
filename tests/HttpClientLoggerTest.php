@@ -121,5 +121,8 @@ it('can trim the body response', function (array $config, string $contentType, b
             'shouldTrim' => false,
         ],
     ],
-    [true, false]
+    [
+        'with-charset' => ['addCharsetToContentType' => true],
+        'without-charset' => ['addCharsetToContentType' => false],
+    ]
 );
