@@ -27,18 +27,18 @@
     ],
     "require": {
         "php": "^8.2",
-        "illuminate/http": "^11.0",
-        "illuminate/support": "^11.0",
+        "illuminate/http": "^11.0||^12.0",
+        "illuminate/support": "^11.0||^12.0",
         "monolog/monolog": "^3.0"
     },
     "require-dev": {
-        "laravel/framework": "^11.0",
+        "laravel/framework": "^11.0||^12.0",
         "laravel/pint": "^1.18",
-        "orchestra/testbench": "^8.8|^9.0",
+        "orchestra/testbench": "^9.0||^10.0",
         "pestphp/pest": "^3.0",
         "pestphp/pest-plugin-arch": "^3.0",
         "pestphp/pest-plugin-laravel": "^3.0",
-        "saloonphp/laravel-http-sender": "^2.0|^3.0",
+        "saloonphp/laravel-http-sender": "^3.0",
         "saloonphp/laravel-plugin": "^3.0",
         "spatie/invade": "^2.0"
     },
