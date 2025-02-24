@@ -1,7 +1,10 @@
 # CHANGELOG
 
-## [v1.2.x (Unreleased)](https://github.com/onlime/laravel-http-client-global-logger/compare/v1.2.0...main)
+## [v1.2.x (Unreleased)](https://github.com/onlime/laravel-http-client-global-logger/compare/v1.2.1...main)
 
+## [v1.2.1 (2025-02-24)](https://github.com/onlime/laravel-http-client-global-logger/compare/v1.2.0...v1.2.1)
+
+- Laravel 12 support
 - Drop Laravel 10 support and fixed CI
 
 ## [v1.2.0 (2024-10-15)](https://github.com/onlime/laravel-http-client-global-logger/compare/v1.1.3...v1.2.0)

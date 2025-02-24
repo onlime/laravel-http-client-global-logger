@@ -33,14 +33,14 @@
     },
     "require-dev": {
         "laravel/framework": "^11.0||^12.0",
-        "laravel/pint": "^1.18",
+        "laravel/pint": "^1.21",
         "orchestra/testbench": "^9.0||^10.0",
-        "pestphp/pest": "^3.0",
+        "pestphp/pest": "^3.7",
         "pestphp/pest-plugin-arch": "^3.0",
-        "pestphp/pest-plugin-laravel": "^3.0",
+        "pestphp/pest-plugin-laravel": "^3.1",
         "saloonphp/laravel-http-sender": "^3.0",
-        "saloonphp/laravel-plugin": "^3.0",
-        "spatie/invade": "^2.0"
+        "saloonphp/laravel-plugin": "^3.5.1",
+        "spatie/invade": "^2.1"
     },
     "suggest": {
         "saloonphp/laravel-plugin": "To support logging of Saloon events (^3.0)"
@@ -73,6 +73,6 @@
             ]
         }
     },
-    "minimum-stability": "dev",
+    "minimum-stability": "stable",
     "prefer-stable": true
 }
