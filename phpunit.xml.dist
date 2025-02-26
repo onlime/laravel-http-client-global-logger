@@ -27,9 +27,6 @@
             <clover outputFile="build/logs/clover.xml"/>
         </report>
     </coverage>
-    <php>
-        <env name="TESTBENCH_CONVERT_DEPRECATIONS_TO_EXCEPTIONS" value="false" />
-    </php>
     <logging>
         <junit outputFile="build/report.junit.xml"/>
     </logging>
