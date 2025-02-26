@@ -38,7 +38,7 @@
         "pestphp/pest": "^3.7",
         "pestphp/pest-plugin-arch": "^3.0",
         "pestphp/pest-plugin-laravel": "^3.1",
-        "saloonphp/laravel-http-sender": "^3.0",
+        "saloonphp/laravel-http-sender": "^3.1",
         "saloonphp/laravel-plugin": "^3.5.1",
         "spatie/invade": "^2.1"
     },
