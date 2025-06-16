@@ -5,6 +5,7 @@
 ## [v1.2.3 (2025-06-16)](https://github.com/onlime/laravel-http-client-global-logger/compare/v1.2.2...v1.2.3)
 
 - [Security] Body key obfuscation (`obfuscate.body_keys` config) is now also applied to response body, both for JSON or form-styled content.
+- Refactored `obfuscateBody()` for performance to run single regex replacements on message body.
 
 ## [v1.2.2 (2025-06-16)](https://github.com/onlime/laravel-http-client-global-logger/compare/v1.2.1...v1.2.2)
 
