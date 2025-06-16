@@ -1,10 +1,15 @@
 # CHANGELOG
 
-## [v1.2.x (Unreleased)](https://github.com/onlime/laravel-http-client-global-logger/compare/v1.2.3...main)
+## [v1.2.x (Unreleased)](https://github.com/onlime/laravel-http-client-global-logger/compare/v1.2.4...main)
+
+## [v1.2.4 (2025-06-16)](https://github.com/onlime/laravel-http-client-global-logger/compare/v1.2.3...v1.2.4)
+
+- Revert `obfuscateBody()` refactoring from v1.2.3, as it caused `preg_replace(): Compilation failed: lookbehind assertion is not fixed length at offset 0` issues.
 
 ## [v1.2.3 (2025-06-16)](https://github.com/onlime/laravel-http-client-global-logger/compare/v1.2.2...v1.2.3)
 
 - [Security] Body key obfuscation (`obfuscate.body_keys` config) is now also applied to response body, both for JSON or form-styled content.
+- Refactored `obfuscateBody()` for performance to run single regex replacements on message body.
 
 ## [v1.2.2 (2025-06-16)](https://github.com/onlime/laravel-http-client-global-logger/compare/v1.2.1...v1.2.2)
 
