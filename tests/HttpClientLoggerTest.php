@@ -154,11 +154,11 @@ it('always trims the response body when special header is set on request', funct
         ->get('https://example.com');
 })->with([true, false]);
 
-it('obfuscates header and body keys', function (string $body, string $expected) {
+it('obfuscates request header and body', function (string $body, string $expected) {
     $logger = setupLogger();
 
     $logger->shouldReceive('info')->withArgs(function ($message) use ($expected) {
-        expect($message)->toContain('REQUEST: GET https://example.com')
+        expect($message)->toContain('REQUEST: POST https://example.com')
             ->and($message)->toContain('Authorization: **********')
             ->and($message)->toContain($expected);
         return true;
@@ -175,7 +175,7 @@ it('obfuscates header and body keys', function (string $body, string $expected) 
         ]),
     ])->withHeader('Authorization', 'Bearer 123')
         ->withBody($body)
-        ->get('https://example.com');
+        ->post('https://example.com');
 })->with([
     'json-style' => [
         '{"key":"value","apikey":"s3cr3tK3y","token":"s0meT0k3n"}',
@@ -183,7 +183,39 @@ it('obfuscates header and body keys', function (string $body, string $expected) 
     ],
     // OpenID Connect example for POST /token endpoint
     // see https://openid.net/specs/openid-connect-core-1_0.html#RefreshingAccessToken
-    'openid-connect' => [
+    'form-style-openid' => [
+        'grant_type=refresh_token&refresh_token=r3fr3shT0k3n&client_id=1234&client_secret=53cr3t',
+        'grant_type=refresh_token&refresh_token=**********&client_id=1234&client_secret=**********',
+    ],
+]);
+
+it('obfuscates response body', function (string $body, string $expected) {
+    $logger = setupLogger();
+
+    $logger->shouldReceive('info')->withArgs(function ($message) use ($expected) {
+        expect($message)->toContain('REQUEST: POST https://example.com')
+            ->and($message)->toContain($expected);
+        return true;
+    })->once();
+
+    $logger->shouldReceive('info')->withArgs(function ($message) use ($expected) {
+        expect($message)->toContain('RESPONSE: HTTP/1.1 200 OK')
+            ->and($message)->toContain($expected);
+        return true;
+    })->once();
+
+    Http::fake([
+        '*' => Http::response($body, 200, [
+            'Content-Type' => 'application/json',
+        ]),
+    ])->withBody($body)
+        ->post('https://example.com');
+})->with([
+    'json-style-openid' => [
+        '{"access_token":"s0meT0k3n-1","expires_in":300,"refresh_token":"s0meT0k3n-2","token_type":"Bearer","id_token":"s0meT0k3n-3","session_state":"1234-56","scope":"foo bar"}',
+        '{"access_token":"**********","expires_in":300,"refresh_token":"**********","token_type":"Bearer","id_token":"**********","session_state":"1234-56","scope":"foo bar"}',
+    ],
+    'form-style' => [
         'grant_type=refresh_token&refresh_token=r3fr3shT0k3n&client_id=1234&client_secret=53cr3t',
         'grant_type=refresh_token&refresh_token=**********&client_id=1234&client_secret=**********',
     ],

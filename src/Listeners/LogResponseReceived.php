@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Onlime\LaravelHttpClientGlobalLogger\Listeners;
 
 use GuzzleHttp\MessageFormatter;
@@ -9,11 +11,14 @@ use Illuminate\Http\Client\Events\ResponseReceived;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Onlime\LaravelHttpClientGlobalLogger\EventHelper;
+use Onlime\LaravelHttpClientGlobalLogger\Traits\ObfuscatesBody;
 use Psr\Http\Message\MessageInterface;
 use Saloon\Laravel\Events\SentSaloonRequest;
 
 class LogResponseReceived
 {
+    use ObfuscatesBody;
+
     /**
      * Handle the event.
      */
@@ -25,13 +30,21 @@ class LogResponseReceived
 
         $formatter = new MessageFormatter(config('http-client-global-logger.format.response'));
         $psrRequest = EventHelper::getPsrRequest($event);
-        Log::channel(config('http-client-global-logger.channel'))->info($formatter->format(
+
+        $message = $formatter->format(
             $psrRequest,
             $this->trimBody(
                 EventHelper::getPsrResponse($event),
                 $psrRequest->hasHeader('X-Global-Logger-Trim-Always')
             )
-        ));
+        );
+
+        if (config('http-client-global-logger.obfuscate.enabled')) {
+            $message = $this->obfuscateBody($message);
+        }
+
+        Log::channel(config('http-client-global-logger.channel'))
+            ->info($message);
     }
 
     /**

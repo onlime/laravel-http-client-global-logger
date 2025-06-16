@@ -10,7 +10,7 @@ return [
     | Whether or not logging should be enabled/disabled.
     |
     */
-    'enabled' => env('HTTP_CLIENT_GLOBAL_LOGGER_ENABLED', true),
+    'enabled' => (bool) env('HTTP_CLIENT_GLOBAL_LOGGER_ENABLED', true),
 
     /*
     |--------------------------------------------------------------------------
@@ -24,7 +24,7 @@ return [
     | channel name.
     |
     */
-    'mixin' => env('HTTP_CLIENT_GLOBAL_LOGGER_MIXIN', false),
+    'mixin' => (bool) env('HTTP_CLIENT_GLOBAL_LOGGER_MIXIN', false),
 
     /*
     |--------------------------------------------------------------------------
@@ -96,7 +96,7 @@ return [
     | Obfuscation only works if you have disabled 'mixin' above, which is the default.
     */
     'obfuscate' => [
-        'enabled' => env('HTTP_CLIENT_GLOBAL_LOGGER_OBFUSCATE_ENABLED', true),
+        'enabled' => (bool) env('HTTP_CLIENT_GLOBAL_LOGGER_OBFUSCATE_ENABLED', true),
         'replacement' => env('HTTP_CLIENT_GLOBAL_LOGGER_OBFUSCATE_REPLACEMENT', '**********'),
         'headers' => explode(',', env(
             'HTTP_CLIENT_GLOBAL_LOGGER_OBFUSCATE_HEADERS',
@@ -123,8 +123,8 @@ return [
     | request: X-Global-Logger-Trim-Always (set it to any value, e.g. 'true').
     */
     'trim_response_body' => [
-        'enabled' => env('HTTP_CLIENT_GLOBAL_LOGGER_TRIM_RESPONSE_BODY_ENABLED', false),
-        'limit' => env('HTTP_CLIENT_GLOBAL_LOGGER_TRIM_RESPONSE_BODY_LIMIT', 200),
+        'enabled' => (bool) env('HTTP_CLIENT_GLOBAL_LOGGER_TRIM_RESPONSE_BODY_ENABLED', false),
+        'limit' => (int) env('HTTP_CLIENT_GLOBAL_LOGGER_TRIM_RESPONSE_BODY_LIMIT', 200),
         'content_type_whitelist' => explode(',', env(
             'HTTP_CLIENT_GLOBAL_LOGGER_TRIM_RESPONSE_BODY_CONTENT_TYPE_WHITELIST',
             ',application/json'

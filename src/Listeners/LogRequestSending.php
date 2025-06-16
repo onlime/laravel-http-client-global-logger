@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Onlime\LaravelHttpClientGlobalLogger\Listeners;
 
 use GuzzleHttp\MessageFormatter;
@@ -7,11 +9,14 @@ use Illuminate\Http\Client\Events\RequestSending;
 use Illuminate\Support\Facades\Log;
 use Onlime\LaravelHttpClientGlobalLogger\EventHelper;
 use Onlime\LaravelHttpClientGlobalLogger\HttpClientLogger;
+use Onlime\LaravelHttpClientGlobalLogger\Traits\ObfuscatesBody;
 use Psr\Http\Message\RequestInterface;
 use Saloon\Laravel\Events\SendingSaloonRequest;
 
 class LogRequestSending
 {
+    use ObfuscatesBody;
+
     /**
      * Handle the event if the HTTP Client global request middleware was not added manually
      * with HttpClientLogger::addRequestMiddleware(). Always handle it for Saloon requests.
@@ -46,25 +51,11 @@ class LogRequestSending
         $message = $formatter->format($psrRequest);
 
         if ($obfuscate) {
-            $replacement = config('http-client-global-logger.obfuscate.replacement');
-            foreach (config('http-client-global-logger.obfuscate.body_keys') as $key) {
-                $quoted = preg_quote($key, '/');
-                // JSON-style: "key":"value"
-                $message = preg_replace(
-                    '/(?<="'.$quoted.'":")[^"]*(?=")/mU',
-                    $replacement,
-                    $message
-                );
-                // form-style: key=value (until & or end)
-                $message = preg_replace(
-                    '/(?<=\b'. $quoted .'=)[^&]*(?=&|$)/',
-                    $replacement,
-                    $message
-                );
-            }
+            $message = $this->obfuscateBody($message);
         }
 
-        Log::channel(config('http-client-global-logger.channel'))->info($message);
+        Log::channel(config('http-client-global-logger.channel'))
+            ->info($message);
     }
 
     /**
