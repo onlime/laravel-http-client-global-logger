@@ -16,24 +16,21 @@ trait ObfuscatesBody
     {
         $replacement = config('http-client-global-logger.obfuscate.replacement');
 
-        // Build regex pattern for keys to obfuscate
-        $keysPattern = implode('|', array_map(
-            fn (string $key) => preg_quote($key, '/'),
-            config('http-client-global-logger.obfuscate.body_keys')
-        ));
-
-        // JSON-style: "(key1|key2)": "someValue"
-        $message = preg_replace(
-            '/(?<="(?:' . $keysPattern . ')":")[^"]*(?=")/mU',
-            $replacement,
-            $message
-        );
-        // form-style: key1=someValue& or key2=someValue$
-        $message = preg_replace(
-            '/(?<=\b(?:'. $keysPattern .')=)[^&]*(?=&|$)/',
-            $replacement,
-            $message
-        );
+        foreach (config('http-client-global-logger.obfuscate.body_keys') as $key) {
+            $quoted = preg_quote($key, '/');
+            // JSON-style: "key":"value"
+            $message = preg_replace(
+                '/(?<="'.$quoted.'":")[^"]*(?=")/mU',
+                $replacement,
+                $message
+            );
+            // form-style: key=value (until & or end)
+            $message = preg_replace(
+                '/(?<=\b'. $quoted .'=)[^&]*(?=&|$)/',
+                $replacement,
+                $message
+            );
+        }
 
         return $message;
     }
