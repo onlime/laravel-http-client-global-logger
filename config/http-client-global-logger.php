@@ -104,7 +104,7 @@ return [
         )),
         'body_keys' => explode(',', env(
             'HTTP_CLIENT_GLOBAL_LOGGER_OBFUSCATE_BODY_KEYS',
-            'pass,password,token,apikey,access_token,refresh_token,client_secret'
+            'pass,password,token,apikey,access_token,refresh_token,id_token,client_secret'
         )),
     ],
 

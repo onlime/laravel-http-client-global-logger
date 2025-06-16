@@ -46,10 +46,19 @@ class LogRequestSending
         $message = $formatter->format($psrRequest);
 
         if ($obfuscate) {
+            $replacement = config('http-client-global-logger.obfuscate.replacement');
             foreach (config('http-client-global-logger.obfuscate.body_keys') as $key) {
+                $quoted = preg_quote($key, '/');
+                // JSON-style: "key":"value"
                 $message = preg_replace(
-                    '/(?<="'.$key.'":").*(?=")/mU',
-                    config('http-client-global-logger.obfuscate.replacement'),
+                    '/(?<="'.$quoted.'":")[^"]*(?=")/mU',
+                    $replacement,
+                    $message
+                );
+                // form-style: key=value (until & or end)
+                $message = preg_replace(
+                    '/(?<=\b'. $quoted .'=)[^&]*(?=&|$)/',
+                    $replacement,
                     $message
                 );
             }

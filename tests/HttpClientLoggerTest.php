@@ -153,3 +153,38 @@ it('always trims the response body when special header is set on request', funct
     ])->withHeader($withHeader ? 'X-Global-Logger-Trim-Always' : 'X-Dummy', 'true')
         ->get('https://example.com');
 })->with([true, false]);
+
+it('obfuscates header and body keys', function (string $body, string $expected) {
+    $logger = setupLogger();
+
+    $logger->shouldReceive('info')->withArgs(function ($message) use ($expected) {
+        expect($message)->toContain('REQUEST: GET https://example.com')
+            ->and($message)->toContain('Authorization: **********')
+            ->and($message)->toContain($expected);
+        return true;
+    })->once();
+
+    $logger->shouldReceive('info')->withArgs(function ($message) {
+        expect($message)->toContain('RESPONSE: HTTP/1.1 200 OK');
+        return true;
+    })->once();
+
+    Http::fake([
+        '*' => Http::response('', 200, [
+            'Content-Type' => 'application/json',
+        ]),
+    ])->withHeader('Authorization', 'Bearer 123')
+        ->withBody($body)
+        ->get('https://example.com');
+})->with([
+    'json-style' => [
+        '{"key":"value","apikey":"s3cr3tK3y","token":"s0meT0k3n"}',
+        '{"key":"value","apikey":"**********","token":"**********"}',
+    ],
+    // OpenID Connect example for POST /token endpoint
+    // see https://openid.net/specs/openid-connect-core-1_0.html#RefreshingAccessToken
+    'openid-connect' => [
+        'grant_type=refresh_token&refresh_token=r3fr3shT0k3n&client_id=1234&client_secret=53cr3t',
+        'grant_type=refresh_token&refresh_token=**********&client_id=1234&client_secret=**********',
+    ],
+]);

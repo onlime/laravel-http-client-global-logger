@@ -1,6 +1,11 @@
 # CHANGELOG
 
-## [v1.2.x (Unreleased)](https://github.com/onlime/laravel-http-client-global-logger/compare/v1.2.1...main)
+## [v1.2.x (Unreleased)](https://github.com/onlime/laravel-http-client-global-logger/compare/v1.2.2...main)
+
+## [v1.2.2 (2025-06-16)](https://github.com/onlime/laravel-http-client-global-logger/compare/v1.2.1...v1.2.2)
+
+- [Security] Body key obfuscation (`obfuscate.body_keys` config) is now also applied to form-style request bodies, not only JSON bodies. This prevents accidental logging of e.g. OpenID Connect (OAuth 2.0) tokens on `POST /token` endpoint, which may contain the `refresh_token` and `client_secret`.
+- [Security] Added `id_token` as additional body key for obfuscation to the `HTTP_CLIENT_GLOBAL_LOGGER_OBFUSCATE_BODY_KEYS` default.
 
 ## [v1.2.1 (2025-02-26)](https://github.com/onlime/laravel-http-client-global-logger/compare/v1.2.0...v1.2.1)
 
