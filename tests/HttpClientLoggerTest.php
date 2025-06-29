@@ -189,6 +189,43 @@ it('obfuscates request header and body', function (string $body, string $expecte
     ],
 ]);
 
+it('obfuscates request uri via body obfuscation', function (string $uri, string $expected) {
+    $logger = setupLogger();
+
+    $logger->shouldReceive('info')->withArgs(function ($message) use ($expected) {
+        expect($message)->toContain('REQUEST: GET '.$expected);
+        return true;
+    })->once();
+
+    $logger->shouldReceive('info')->withArgs(function ($message) {
+        expect($message)->toContain('RESPONSE: HTTP/1.1 200 OK');
+        return true;
+    })->once();
+
+    Http::fake([
+        '*' => Http::response('', 200, [
+            'Content-Type' => 'application/json',
+        ]),
+    ])->get($uri);
+})->with([
+    'no-query-params' => [
+        'https://example.com',
+        'https://example.com',
+    ],
+    'sensitive-query-param' => [
+        'https://example.com?access_key=1234',
+        'https://example.com?access_key=**********',
+    ],
+    'other-query-param' => [
+        'https://example.com?foo=bar&baz=qux',
+        'https://example.com?foo=bar&baz=qux',
+    ],
+    'mixed-query-params' => [
+        'https://example.com?token=xyz&foo=bar&access_key=1234',
+        'https://example.com?token=**********&foo=bar&access_key=**********',
+    ],
+]);
+
 it('obfuscates response body', function (string $body, string $expected) {
     $logger = setupLogger();
 

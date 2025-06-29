@@ -56,7 +56,9 @@
         }
     },
     "scripts": {
-        "test": "vendor/bin/pest",
+        "testbench:reset": "echo RESETTING TESTBENCH; rm -rf vendor/orchestra/testbench-core/laravel-foo",
+        "test": "pest",
+        "pretest": "@testbench:reset",
         "test-coverage": "vendor/bin/pest --coverage",
         "format": "vendor/bin/pint"
     },
