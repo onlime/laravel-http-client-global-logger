@@ -1,6 +1,10 @@
 # CHANGELOG
 
-## [v1.2.x (Unreleased)](https://github.com/onlime/laravel-http-client-global-logger/compare/v1.2.5...main)
+## [v1.2.x (Unreleased)](https://github.com/onlime/laravel-http-client-global-logger/compare/v1.2.6...main)
+
+## [v1.2.6 (2025-06-30)](https://github.com/onlime/laravel-http-client-global-logger/compare/v1.2.5...v1.2.6)
+
+- Fix message body obfuscation, improving the regexes in `obfuscateBody()` to prevent truncation on replacement.
 
 ## [v1.2.5 (2025-06-29)](https://github.com/onlime/laravel-http-client-global-logger/compare/v1.2.4...v1.2.5)
 

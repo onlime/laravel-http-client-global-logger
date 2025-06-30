@@ -158,14 +158,14 @@ it('obfuscates request header and body', function (string $body, string $expecte
     $logger = setupLogger();
 
     $logger->shouldReceive('info')->withArgs(function ($message) use ($expected) {
-        expect($message)->toContain('REQUEST: POST https://example.com')
-            ->and($message)->toContain('Authorization: **********')
+        expect($message)->toContain("REQUEST: POST https://example.com\r\n")
+            ->and($message)->toContain("Authorization: **********\r\n")
             ->and($message)->toContain($expected);
         return true;
     })->once();
 
     $logger->shouldReceive('info')->withArgs(function ($message) {
-        expect($message)->toContain('RESPONSE: HTTP/1.1 200 OK');
+        expect($message)->toContain("RESPONSE: HTTP/1.1 200 OK\r\n");
         return true;
     })->once();
 
@@ -193,7 +193,8 @@ it('obfuscates request uri via body obfuscation', function (string $uri, string 
     $logger = setupLogger();
 
     $logger->shouldReceive('info')->withArgs(function ($message) use ($expected) {
-        expect($message)->toContain('REQUEST: GET '.$expected);
+        expect($message)->toContain("REQUEST: GET $expected\r\n")
+            ->and(substr_count($message, "\r\n"))->toBeGreaterThan(1);
         return true;
     })->once();
 
