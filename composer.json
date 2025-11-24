@@ -29,17 +29,17 @@
         "php": "^8.2",
         "illuminate/http": "^11.0||^12.0",
         "illuminate/support": "^11.0||^12.0",
-        "monolog/monolog": "^3.0"
+        "monolog/monolog": "^3.9"
     },
     "require-dev": {
         "laravel/framework": "^11.0||^12.0",
-        "laravel/pint": "^1.21",
+        "laravel/pint": "^1.25",
         "orchestra/testbench": "^9.0||^10.0",
-        "pestphp/pest": "^3.7",
-        "pestphp/pest-plugin-arch": "^3.0",
-        "pestphp/pest-plugin-laravel": "^3.1",
+        "pestphp/pest": "^3.8",
+        "pestphp/pest-plugin-arch": "^3.1",
+        "pestphp/pest-plugin-laravel": "^3.2",
         "saloonphp/laravel-http-sender": "^3.1",
-        "saloonphp/laravel-plugin": "^3.5.1",
+        "saloonphp/laravel-plugin": "^3.7",
         "spatie/invade": "^2.1"
     },
     "suggest": {
