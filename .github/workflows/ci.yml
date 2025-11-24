@@ -53,6 +53,10 @@ jobs:
             --no-interaction --no-update
           composer update --${{ matrix.stability }} --prefer-dist --no-interaction
 
-      - name: Execute tests
-        run: |
-          vendor/bin/pest
+      - name: Run tests (no coverage)
+        if: matrix.php != '8.4'
+        run: vendor/bin/pest
+
+      - name: Run tests with coverage (PHP 8.4 only)
+        if: matrix.php == '8.4'
+        run: vendor/bin/pest --coverage
