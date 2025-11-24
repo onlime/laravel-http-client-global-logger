@@ -35,9 +35,9 @@
         "laravel/framework": "^11.0 || ^12.0",
         "laravel/pint": "^1.25",
         "orchestra/testbench": "^9.0 || ^10.0",
-        "pestphp/pest": "^3.8 || 4.1",
-        "pestphp/pest-plugin-arch": "^3.1 || 4.0",
-        "pestphp/pest-plugin-laravel": "^3.2 || 4.0",
+        "pestphp/pest": "^3.8 || ^4.1",
+        "pestphp/pest-plugin-arch": "^3.1 || ^4.0",
+        "pestphp/pest-plugin-laravel": "^3.2 || ^4.0",
         "saloonphp/laravel-http-sender": "^3.1",
         "saloonphp/laravel-plugin": "^3.7",
         "spatie/invade": "^2.1"
