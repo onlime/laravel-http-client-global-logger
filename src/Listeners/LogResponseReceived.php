@@ -24,10 +24,6 @@ class LogResponseReceived
      */
     public function handle(ResponseReceived|SentSaloonRequest $event): void
     {
-        if (! EventHelper::shouldBeLogged($event)) {
-            return;
-        }
-
         $formatter = new MessageFormatter(config('http-client-global-logger.format.response'));
         $psrRequest = EventHelper::getPsrRequest($event);
 

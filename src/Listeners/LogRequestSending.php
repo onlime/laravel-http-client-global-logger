@@ -35,10 +35,6 @@ class LogRequestSending
      */
     public function handleEvent(RequestSending|SendingSaloonRequest $event): void
     {
-        if (! EventHelper::shouldBeLogged($event)) {
-            return;
-        }
-
         $psrRequest = EventHelper::getPsrRequest($event);
 
         $obfuscate  = config('http-client-global-logger.obfuscate.enabled');
