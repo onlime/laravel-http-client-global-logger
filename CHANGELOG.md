@@ -1,6 +1,19 @@
 # CHANGELOG
 
-## [v1.2.x (Unreleased)](https://github.com/onlime/laravel-http-client-global-logger/compare/v1.2.6...main)
+## [v1.2.x (Unreleased)](https://github.com/onlime/laravel-http-client-global-logger/compare/v1.2.9...main)
+
+## [v1.2.9 (2026-03-01)](https://github.com/onlime/laravel-http-client-global-logger/compare/v1.2.8...v1.2.9)
+
+- Laravel 13 support
+
+## [v1.2.8 (2025-11-24)](https://github.com/onlime/laravel-http-client-global-logger/compare/v1.2.7...v1.2.8)
+
+- Fixed Composer version constraints
+
+## [v1.2.7 (2025-11-24)](https://github.com/onlime/laravel-http-client-global-logger/compare/v1.2.6...v1.2.7)
+
+- PHP 8.5 Support
+- PEST v4
 
 ## [v1.2.6 (2025-06-30)](https://github.com/onlime/laravel-http-client-global-logger/compare/v1.2.5...v1.2.6)
 
