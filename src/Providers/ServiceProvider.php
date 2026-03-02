@@ -11,8 +11,6 @@ use Monolog\Handler\StreamHandler;
 use Onlime\LaravelHttpClientGlobalLogger\Listeners\LogRequestSending;
 use Onlime\LaravelHttpClientGlobalLogger\Listeners\LogResponseReceived;
 use Onlime\LaravelHttpClientGlobalLogger\Mixins\PendingRequestMixin;
-use Saloon\Laravel\Events\SendingSaloonRequest;
-use Saloon\Laravel\Events\SentSaloonRequest;
 
 class ServiceProvider extends BaseServiceProvider
 {
@@ -36,8 +34,10 @@ class ServiceProvider extends BaseServiceProvider
         Event::listen(ResponseReceived::class, LogResponseReceived::class);
 
         // Saloon
-        Event::listen(SendingSaloonRequest::class, LogRequestSending::class);
-        Event::listen(SentSaloonRequest::class, LogResponseReceived::class);
+        if (class_exists(\Saloon\Laravel\SaloonServiceProvider::class)) {
+            Event::listen(\Saloon\Laravel\Events\SendingSaloonRequest::class, LogRequestSending::class);
+            Event::listen(\Saloon\Laravel\Events\SentSaloonRequest::class, LogResponseReceived::class);
+        }
     }
 
     public function boot()

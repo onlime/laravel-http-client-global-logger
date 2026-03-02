@@ -54,8 +54,13 @@ jobs:
           composer require \
             "laravel/framework:${{ matrix.laravel }}" \
             "orchestra/testbench:${{ matrix.testbench }}" \
-            --no-interaction --no-update
-          composer update --${{ matrix.stability }} --prefer-dist --no-interaction
+            --dev --no-interaction --no-update \
+            ${{ matrix.laravel == '13.*' && '--ignore-platform-reqs' || '' }}
+
+          composer update \
+            --${{ matrix.stability }} \
+            --prefer-dist --no-interaction \
+            ${{ matrix.laravel == '13.*' && '--ignore-platform-reqs' || '' }}
 
       - name: Run tests (no coverage)
         if: matrix.php != '8.4'
