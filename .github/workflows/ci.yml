@@ -54,13 +54,16 @@ jobs:
           composer require \
             "laravel/framework:${{ matrix.laravel }}" \
             "orchestra/testbench:${{ matrix.testbench }}" \
-            --dev --no-interaction --no-update \
-            ${{ matrix.laravel == '13.*' && '--ignore-platform-reqs' || '' }}
+            --dev --no-interaction --no-update
+
+          # Use Saloon PR branch that supports Laravel 13
+          composer require \
+            saloonphp/laravel-plugin:dev-pr-77 \
+            --dev --no-interaction --no-update
 
           composer update \
             --${{ matrix.stability }} \
-            --prefer-dist --no-interaction \
-            ${{ matrix.laravel == '13.*' && '--ignore-platform-reqs' || '' }}
+            --prefer-dist --no-interaction
 
       - name: Run tests (no coverage)
         if: matrix.php != '8.4'
