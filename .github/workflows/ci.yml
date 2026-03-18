@@ -9,7 +9,7 @@ jobs:
       fail-fast: true
       matrix:
         php: [8.5, 8.4, 8.3, 8.2]
-        laravel: [13.*, 12.*, 11.*]
+        laravel: [13.*, 12.*]
         stability: [prefer-lowest, prefer-stable]
         os: [ubuntu-latest]
         include:
@@ -17,8 +17,6 @@ jobs:
             testbench: 11.*
           - laravel: 12.*
             testbench: 10.*
-          - laravel: 11.*
-            testbench: 9.*
         exclude:
           - php: 8.2
             laravel: 13.*
@@ -56,10 +54,14 @@ jobs:
             "orchestra/testbench:${{ matrix.testbench }}" \
             --dev --no-interaction --no-update
 
-          # Use Saloon PR branch that supports Laravel 13
-          composer require \
-            saloonphp/laravel-plugin:dev-pr-77 \
-            --dev --no-interaction --no-update
+          # saloonphp/laravel-plugin does not yet have a stable release for Laravel 13
+          # Use Saloon PR branch with inline alias to satisfy ^3.9 and minimum-stability:stable
+          # see https://github.com/saloonphp/laravel-plugin/pull/77
+          if [[ "${{ matrix.laravel }}" == "13.*" ]]; then
+            composer require \
+              "saloonphp/laravel-plugin:dev-pr-77 as 3.9.2" \
+              --dev --no-interaction --no-update
+          fi
 
           composer update \
             --${{ matrix.stability }} \

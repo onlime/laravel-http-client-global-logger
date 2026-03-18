@@ -1,11 +1,12 @@
 # CHANGELOG
 
-## [v1.2.x (Unreleased)](https://github.com/onlime/laravel-http-client-global-logger/compare/v1.2.9...main)
+## [v1.3.x (Unreleased)](https://github.com/onlime/laravel-http-client-global-logger/compare/v1.3.0...main)
 
-## [v1.2.9 (2026-03-01)](https://github.com/onlime/laravel-http-client-global-logger/compare/v1.2.8...v1.2.9)
+## [v1.3.0 (2026-03-18)](https://github.com/onlime/laravel-http-client-global-logger/compare/v1.2.8...v1.3.0)
 
 - Laravel 13 support
-- Removed `saloonphp/laravel-http-sender` dependency, as `HttpSender` is no longer supported by Saloon v3,  replaced by `GuzzleSender`.
+- Drop Laravel 11 support
+- Removed `saloonphp/laravel-http-sender` dependency, as `HttpSender` is no longer supported by Saloon v3, replaced by `GuzzleSender`.
 
 ## [v1.2.8 (2025-11-24)](https://github.com/onlime/laravel-http-client-global-logger/compare/v1.2.7...v1.2.8)
 
