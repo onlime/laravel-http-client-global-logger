@@ -7,6 +7,7 @@
 - Laravel 13 support
 - Drop Laravel 11 support
 - Removed `saloonphp/laravel-http-sender` dependency, as `HttpSender` is no longer supported by Saloon v3, replaced by `GuzzleSender`.
+- Bumped GitHub actions (`actions/checkout`, `actions/cache`) to v5 (Node.js 24)
 
 ## [v1.2.8 (2025-11-24)](https://github.com/onlime/laravel-http-client-global-logger/compare/v1.2.7...v1.2.8)
 
