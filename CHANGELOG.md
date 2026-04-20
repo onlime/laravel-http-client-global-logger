@@ -1,10 +1,11 @@
 # CHANGELOG
 
-## [v1.3.x (Unreleased)](https://github.com/onlime/laravel-http-client-global-logger/compare/v1.3.1...main)
+## [v1.4.x (Unreleased)](https://github.com/onlime/laravel-http-client-global-logger/compare/v1.4.0...main)
 
-## [v1.3.1 (2026-04-20)](https://github.com/onlime/laravel-http-client-global-logger/compare/v1.3.0...v1.3.1)
+## [v1.4.0 (2026-04-20)](https://github.com/onlime/laravel-http-client-global-logger/compare/v1.3.0...v1.4.0)
 
 - Feature | URL exclusion patterns via `HTTP_CLIENT_GLOBAL_LOGGER_EXCEPT` env var. Comma-separated wildcard patterns (using `Str::is()`) to skip logging for specific URLs, e.g. `https://api.pirsch.io/*,https://sentry.io/*`.
+- Bumped `saloonphp/laravel-plugin` to `^4.1`, removed `laravel-shift/laravel-plugin` fork workaround from CI.
 
 ## [v1.3.0 (2026-03-18)](https://github.com/onlime/laravel-http-client-global-logger/compare/v1.2.8...v1.3.0)
 

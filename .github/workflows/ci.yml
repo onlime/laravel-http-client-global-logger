@@ -54,16 +54,6 @@ jobs:
             "orchestra/testbench:${{ matrix.testbench }}" \
             --dev --no-interaction --no-update
 
-          # saloonphp/laravel-plugin does not yet have a stable release for Laravel 13
-          # Use laravel-shift fork branch with inline alias to satisfy ^3.9 and minimum-stability:stable
-          # see https://github.com/saloonphp/laravel-plugin/pull/77
-          if [[ "${{ matrix.laravel }}" == "13.*" ]]; then
-            composer config repositories.saloon-laravel-plugin vcs https://github.com/laravel-shift/laravel-plugin.git
-            composer require \
-              "saloonphp/laravel-plugin:dev-l13-compatibility as 3.9.2" \
-              --dev --no-interaction --no-update
-          fi
-
           composer update \
             --${{ matrix.stability }} \
             --prefer-dist --no-interaction
