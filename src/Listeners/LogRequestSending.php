@@ -9,6 +9,7 @@ use Illuminate\Http\Client\Events\RequestSending;
 use Illuminate\Support\Facades\Log;
 use Onlime\LaravelHttpClientGlobalLogger\EventHelper;
 use Onlime\LaravelHttpClientGlobalLogger\HttpClientLogger;
+use Onlime\LaravelHttpClientGlobalLogger\Support\UrlFilter;
 use Onlime\LaravelHttpClientGlobalLogger\Traits\ObfuscatesBody;
 use Psr\Http\Message\RequestInterface;
 use Saloon\Laravel\Events\SendingSaloonRequest;
@@ -36,6 +37,10 @@ class LogRequestSending
     public function handleEvent(RequestSending|SendingSaloonRequest $event): void
     {
         $psrRequest = EventHelper::getPsrRequest($event);
+
+        if (! UrlFilter::shouldLog($psrRequest)) {
+            return;
+        }
 
         $obfuscate  = config('http-client-global-logger.obfuscate.enabled');
 

@@ -34,6 +34,7 @@ You may override its configuration in your `.env` - the following environment va
 - `HTTP_CLIENT_GLOBAL_LOGGER_LOGFILE` (string)
 - `HTTP_CLIENT_GLOBAL_LOGGER_REQUEST_FORMAT` (string)
 - `HTTP_CLIENT_GLOBAL_LOGGER_RESPONSE_FORMAT` (string)
+- `HTTP_CLIENT_GLOBAL_LOGGER_EXCEPT` (string, comma-separated URL patterns with wildcard support)
 - `HTTP_CLIENT_GLOBAL_LOGGER_OBFUSCATE_ENABLED` (bool)
 - `HTTP_CLIENT_GLOBAL_LOGGER_OBFUSCATE_REPLACEMENT` (string)
 - `HTTP_CLIENT_GLOBAL_LOGGER_TRIM_RESPONSE_BODY_ENABLED` (bool)
@@ -50,6 +51,7 @@ Using the logger will log both the request and response of an external HTTP requ
 - Logging into separate logfile `http-client.log`. You're free to override this and use your own logging channel or just log to a different logfile.
 - Full support of [Guzzle MessageFormatter](https://github.com/guzzle/guzzle/blob/master/src/MessageFormatter.php) variable substitutions for highly customized log messages.
 - Basic obfuscation of credentials in HTTP Client requests (both by header or body keys)
+- URL exclusion patterns to skip logging for specific URLs (e.g. `HTTP_CLIENT_GLOBAL_LOGGER_EXCEPT=https://api.pirsch.io/*,https://sentry.io/*`)
 - Trimming of response body content to a certain length with support for `Content-Type` whitelisting
 - Enforce trimming of response body content by setting a `X-Global-Logger-Trim-Always` request header, which will ignore the whitelisting.
 - **Variant 1: Global logging** (default)
