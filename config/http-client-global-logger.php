@@ -50,6 +50,18 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Except URL patterns
+    |--------------------------------------------------------------------------
+    |
+    | URLs matching any of these patterns will not be logged. Supports wildcard
+    | patterns using '*' (e.g. 'https://api.pirsch.io/*'). Matching is done
+    | using Illuminate\Support\Str::is().
+    |
+    */
+    'except' => array_filter(explode(',', env('HTTP_CLIENT_GLOBAL_LOGGER_EXCEPT', ''))),
+
+    /*
+    |--------------------------------------------------------------------------
     | Log message formats
     |--------------------------------------------------------------------------
     |

@@ -227,6 +227,47 @@ it('obfuscates request uri via body obfuscation', function (string $uri, string 
     ],
 ]);
 
+it('excludes URLs matching except patterns', function () {
+    config(['http-client-global-logger.except' => ['https://api.pirsch.io/*']]);
+
+    $logger = setupLogger();
+
+    $logger->shouldNotReceive('info');
+
+    Http::fake()->get('https://api.pirsch.io/api/v1/hit');
+});
+
+it('logs URLs not matching except patterns', function () {
+    config(['http-client-global-logger.except' => ['https://api.pirsch.io/*']]);
+
+    $logger = setupLogger();
+
+    $logger->shouldReceive('info')->withArgs(function ($message) {
+        expect($message)->toContain('REQUEST: GET https://example.com');
+        return true;
+    })->once();
+
+    $logger->shouldReceive('info')->withArgs(function ($message) {
+        expect($message)->toContain('RESPONSE: HTTP/1.1 200 OK');
+        return true;
+    })->once();
+
+    Http::fake()->get('https://example.com');
+});
+
+it('supports multiple except patterns', function () {
+    config(['http-client-global-logger.except' => [
+        'https://api.pirsch.io/*',
+        'https://sentry.io/*',
+    ]]);
+
+    $logger = setupLogger();
+
+    $logger->shouldNotReceive('info');
+
+    Http::fake()->get('https://sentry.io/api/0/envelope');
+});
+
 it('obfuscates response body', function (string $body, string $expected) {
     $logger = setupLogger();
 

@@ -6,6 +6,7 @@ use Illuminate\Http\Client\Events\RequestSending;
 use Illuminate\Http\Client\Request;
 use Illuminate\Support\Facades\Http;
 use Onlime\LaravelHttpClientGlobalLogger\Listeners\LogRequestSending;
+use Onlime\LaravelHttpClientGlobalLogger\Support\UrlFilter;
 use Psr\Http\Message\RequestInterface;
 
 /**
@@ -24,6 +25,10 @@ class HttpClientLogger
 
         Http::globalRequestMiddleware(
             fn (RequestInterface $psrRequest) => tap($psrRequest, function (RequestInterface $psrRequest) {
+                if (! UrlFilter::shouldLog($psrRequest)) {
+                    return;
+                }
+
                 // Wrap PSR-7 request into Laravel's HTTP Client Request object
                 $clientRequest = new Request($psrRequest);
 

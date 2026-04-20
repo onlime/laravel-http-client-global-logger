@@ -11,6 +11,7 @@ use Illuminate\Http\Client\Events\ResponseReceived;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Onlime\LaravelHttpClientGlobalLogger\EventHelper;
+use Onlime\LaravelHttpClientGlobalLogger\Support\UrlFilter;
 use Onlime\LaravelHttpClientGlobalLogger\Traits\ObfuscatesBody;
 use Psr\Http\Message\MessageInterface;
 use Saloon\Laravel\Events\SentSaloonRequest;
@@ -24,8 +25,13 @@ class LogResponseReceived
      */
     public function handle(ResponseReceived|SentSaloonRequest $event): void
     {
-        $formatter = new MessageFormatter(config('http-client-global-logger.format.response'));
         $psrRequest = EventHelper::getPsrRequest($event);
+
+        if (! UrlFilter::shouldLog($psrRequest)) {
+            return;
+        }
+
+        $formatter = new MessageFormatter(config('http-client-global-logger.format.response'));
 
         $message = $formatter->format(
             $psrRequest,
