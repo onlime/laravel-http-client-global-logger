@@ -28,6 +28,23 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Combined request/response logging
+    |--------------------------------------------------------------------------
+    |
+    | Log each call as a SINGLE entry (request + response together, emitted when
+    | the response arrives) instead of two separate entries. This is the default:
+    | with two separate entries, concurrent calls — multiple workers/processes
+    | sharing the channel, or pooled/async requests — interleave their REQUEST and
+    | RESPONSE lines in the log and, sharing no correlation id, can no longer be
+    | matched back to each other. The REQUEST/RESPONSE blocks keep their exact same
+    | format; they're just emitted as one log record. Set this to false to restore
+    | the legacy two-entry behaviour.
+    |
+    */
+    'combined' => (bool) env('HTTP_CLIENT_GLOBAL_LOGGER_COMBINED', true),
+
+    /*
+    |--------------------------------------------------------------------------
     | Log to channel
     |--------------------------------------------------------------------------
     |

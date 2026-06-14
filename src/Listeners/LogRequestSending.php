@@ -11,12 +11,13 @@ use Onlime\LaravelHttpClientGlobalLogger\EventHelper;
 use Onlime\LaravelHttpClientGlobalLogger\HttpClientLogger;
 use Onlime\LaravelHttpClientGlobalLogger\Support\UrlFilter;
 use Onlime\LaravelHttpClientGlobalLogger\Traits\ObfuscatesBody;
-use Psr\Http\Message\RequestInterface;
+use Onlime\LaravelHttpClientGlobalLogger\Traits\ObfuscatesHeaders;
 use Saloon\Laravel\Events\SendingSaloonRequest;
 
 class LogRequestSending
 {
     use ObfuscatesBody;
+    use ObfuscatesHeaders;
 
     /**
      * Handle the event if the HTTP Client global request middleware was not added manually
@@ -36,13 +37,19 @@ class LogRequestSending
      */
     public function handleEvent(RequestSending|SendingSaloonRequest $event): void
     {
+        // In combined mode the request is logged together with the response by
+        // LogResponseReceived, so there is no separate request entry to write here.
+        if (config('http-client-global-logger.combined')) {
+            return;
+        }
+
         $psrRequest = EventHelper::getPsrRequest($event);
 
         if (! UrlFilter::shouldLog($psrRequest)) {
             return;
         }
 
-        $obfuscate  = config('http-client-global-logger.obfuscate.enabled');
+        $obfuscate = config('http-client-global-logger.obfuscate.enabled');
 
         if ($obfuscate) {
             $psrRequest = $this->obfuscateHeaders($psrRequest);
@@ -57,28 +64,5 @@ class LogRequestSending
 
         Log::channel(config('http-client-global-logger.channel'))
             ->info($message);
-    }
-
-    /**
-     * Obfuscate headers, e.g. Authorization header.
-     */
-    protected function obfuscateHeaders(RequestInterface $request): RequestInterface
-    {
-        $replacement = config('http-client-global-logger.obfuscate.replacement');
-
-        // TODO: Currently, there is no clean way of modifying the PendingRequest body, e.g. via Macros
-        // see https://stackoverflow.com/q/60603066/5982842
-        // Tried to modify data directly on HTTP Client Request object, but PsrRequest is already set
-        // $data = $request->data();
-        // data_set($data, 'params.pass', $replacement);
-        // $request = $request->withData($data);
-
-        foreach (config('http-client-global-logger.obfuscate.headers') as $name) {
-            if ($request->hasHeader($name)) {
-                $request = $request->withHeader($name, $replacement);
-            }
-        }
-
-        return $request;
     }
 }

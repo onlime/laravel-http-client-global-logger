@@ -2,6 +2,8 @@
 
 ## [v1.4.x (Unreleased)](https://github.com/onlime/laravel-http-client-global-logger/compare/v1.4.0...main)
 
+- Feature | Combined request/response logging via `HTTP_CLIENT_GLOBAL_LOGGER_COMBINED` (default `true`). Each call is now logged as a single atomic record (request + response together) instead of two separate records, so concurrent calls can no longer interleave their request/response halves in the logfile. The individual `REQUEST:` / `RESPONSE:` block format is unchanged. Set to `false` to restore the legacy two-record behaviour.
+
 ## [v1.4.0 (2026-04-20)](https://github.com/onlime/laravel-http-client-global-logger/compare/v1.3.0...v1.4.0)
 
 - Feature | URL exclusion patterns via `HTTP_CLIENT_GLOBAL_LOGGER_EXCEPT` env var. Comma-separated wildcard patterns (using `Str::is()`) to skip logging for specific URLs, e.g. `https://api.pirsch.io/*,https://sentry.io/*`.

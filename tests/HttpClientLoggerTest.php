@@ -9,6 +9,10 @@ use Psr\Log\LoggerInterface;
 
 function setupLogger(): MockInterface
 {
+    // These cases assert the individual REQUEST/RESPONSE entries, so pin the legacy
+    // two-entry mode; the combined default is covered by CombinedLoggingTest.
+    config(['http-client-global-logger.combined' => false]);
+
     HttpClientLogger::addRequestMiddleware();
 
     $logger = Mockery::mock(LoggerInterface::class);

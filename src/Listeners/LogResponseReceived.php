@@ -13,12 +13,14 @@ use Illuminate\Support\Str;
 use Onlime\LaravelHttpClientGlobalLogger\EventHelper;
 use Onlime\LaravelHttpClientGlobalLogger\Support\UrlFilter;
 use Onlime\LaravelHttpClientGlobalLogger\Traits\ObfuscatesBody;
+use Onlime\LaravelHttpClientGlobalLogger\Traits\ObfuscatesHeaders;
 use Psr\Http\Message\MessageInterface;
 use Saloon\Laravel\Events\SentSaloonRequest;
 
 class LogResponseReceived
 {
     use ObfuscatesBody;
+    use ObfuscatesHeaders;
 
     /**
      * Handle the event.
@@ -31,9 +33,9 @@ class LogResponseReceived
             return;
         }
 
-        $formatter = new MessageFormatter(config('http-client-global-logger.format.response'));
+        $obfuscate = config('http-client-global-logger.obfuscate.enabled');
 
-        $message = $formatter->format(
+        $message = (new MessageFormatter(config('http-client-global-logger.format.response')))->format(
             $psrRequest,
             $this->trimBody(
                 EventHelper::getPsrResponse($event),
@@ -41,7 +43,15 @@ class LogResponseReceived
             )
         );
 
-        if (config('http-client-global-logger.obfuscate.enabled')) {
+        // Combined mode: prepend the request so the whole call is a single atomic entry
+        // (no separate request entry is written by LogRequestSending in this mode).
+        if (config('http-client-global-logger.combined')) {
+            $request = $obfuscate ? $this->obfuscateHeaders($psrRequest) : $psrRequest;
+            $requestMessage = (new MessageFormatter(config('http-client-global-logger.format.request')))->format($request);
+            $message = $requestMessage."\n".$message;
+        }
+
+        if ($obfuscate) {
             $message = $this->obfuscateBody($message);
         }
 

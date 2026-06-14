@@ -54,6 +54,7 @@ Using the logger will log both the request and response of an external HTTP requ
 - URL exclusion patterns to skip logging for specific URLs (e.g. `HTTP_CLIENT_GLOBAL_LOGGER_EXCEPT=https://api.pirsch.io/*,https://sentry.io/*`)
 - Trimming of response body content to a certain length with support for `Content-Type` whitelisting
 - Enforce trimming of response body content by setting a `X-Global-Logger-Trim-Always` request header, which will ignore the whitelisting.
+- **Combined request/response logging** (default, `HTTP_CLIENT_GLOBAL_LOGGER_COMBINED=true`): each call is logged as a single atomic record — the request and response together — instead of two separate records. The `REQUEST:` / `RESPONSE:` blocks keep their exact same format; they're just emitted as one log record. This matters under concurrency: when multiple workers/processes share the logfile (or requests are pooled/async), two separate records interleave with other calls' records and — sharing no correlation id — can no longer be matched back to each other. Set to `false` to restore the legacy two-record behaviour.
 - **Variant 1: Global logging** (default)
   - Zero-configuration: Global logging is enabled by default in this package.
   - Simple and performant implementation using `RequestSending` / `ResponseReceived` event listeners
