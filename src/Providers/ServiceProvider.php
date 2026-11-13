@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Onlime\LaravelHttpClientGlobalLogger\Providers;
 
 use Illuminate\Http\Client\Events\RequestSending;
