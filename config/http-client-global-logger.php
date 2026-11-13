@@ -58,7 +58,7 @@ return [
     | using Illuminate\Support\Str::is().
     |
     */
-    'except' => array_filter(explode(',', env('HTTP_CLIENT_GLOBAL_LOGGER_EXCEPT', ''))),
+    'except' => array_filter(explode(',', (string) env('HTTP_CLIENT_GLOBAL_LOGGER_EXCEPT', ''))),
 
     /*
     |--------------------------------------------------------------------------
@@ -110,11 +110,11 @@ return [
     'obfuscate' => [
         'enabled' => (bool) env('HTTP_CLIENT_GLOBAL_LOGGER_OBFUSCATE_ENABLED', true),
         'replacement' => env('HTTP_CLIENT_GLOBAL_LOGGER_OBFUSCATE_REPLACEMENT', '**********'),
-        'headers' => explode(',', env(
+        'headers' => explode(',', (string) env(
             'HTTP_CLIENT_GLOBAL_LOGGER_OBFUSCATE_HEADERS',
             'Authorization'
         )),
-        'body_keys' => explode(',', env(
+        'body_keys' => explode(',', (string) env(
             'HTTP_CLIENT_GLOBAL_LOGGER_OBFUSCATE_BODY_KEYS',
             'pass,password,token,apikey,access_token,access_key,refresh_token,id_token,client_secret'
         )),
@@ -137,7 +137,7 @@ return [
     'trim_response_body' => [
         'enabled' => (bool) env('HTTP_CLIENT_GLOBAL_LOGGER_TRIM_RESPONSE_BODY_ENABLED', false),
         'limit' => (int) env('HTTP_CLIENT_GLOBAL_LOGGER_TRIM_RESPONSE_BODY_LIMIT', 200),
-        'content_type_whitelist' => explode(',', env(
+        'content_type_whitelist' => explode(',', (string) env(
             'HTTP_CLIENT_GLOBAL_LOGGER_TRIM_RESPONSE_BODY_CONTENT_TYPE_WHITELIST',
             ',application/json'
         )),

@@ -8,3 +8,4 @@
 build
 coverage
 phpunit.xml
+/phpstan.neon

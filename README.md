@@ -8,6 +8,11 @@
 
 A super simple global logger for the [Laravel HTTP Client](https://laravel.com/docs/http-client).
 
+## Requirements
+
+- PHP 8.3+ (tested up to PHP 8.6)
+- Laravel 12 or 13
+
 ## Installation
 
 You can install the package via Composer:
@@ -57,12 +62,13 @@ Using the logger will log both the request and response of an external HTTP requ
 - **Variant 1: Global logging** (default)
   - Zero-configuration: Global logging is enabled by default in this package.
   - Simple and performant implementation using `RequestSending` / `ResponseReceived` event listeners
+  - Also logs [Saloon](https://docs.saloon.dev/) requests if [saloonphp/laravel-plugin](https://github.com/saloonphp/laravel-plugin) is installed
   - Obfuscation of common credentials passed in request (e.g. `Authorization` header's Bearer token)
 - **Variant 2: Mixin** (`HTTP_CLIENT_GLOBAL_LOGGER_MIXIN=true`)
   - Enabled only on individual HTTP Client instances, using `Http::log()` - no global logging.
   - Log channel name can be set per HTTP Client instance by passing a name to `Http::log($name)`
 - **Variant 3: Global HTTP Middleware**
-  - Can be used in combination with other `Http::globalRequestMiddleware()` calls in your `AppServiceProvider`'s `boot()` method, after registering your [Global Middleware](https://laravel.com/docs/10.x/http-client#global-middleware).
+  - Can be used in combination with other `Http::globalRequestMiddleware()` calls in your `AppServiceProvider`'s `boot()` method, after registering your [Global Middleware](https://laravel.com/docs/http-client#global-middleware).
 
 
 ## Usage
@@ -119,7 +125,7 @@ $response = $client->get('/user');
 
 ### Variant 3: Global HTTP Middleware
 
-If you use [Global Middleware](https://laravel.com/docs/10.x/http-client#global-middleware) (`Http::globalRequestMiddleware()` and `Http::globalResponseMiddleware()` methods), you should be aware that *Variant 1* uses Laravel's `RequestSending` event to log HTTP requests. This event is fired **before** Global Middleware is executed. Therefore, any modifications to the request made by Global Middleware will not be logged. To overcome this, this package provides a middleware that you may add after your Global Middleware.
+If you use [Global Middleware](https://laravel.com/docs/http-client#global-middleware) (`Http::globalRequestMiddleware()` and `Http::globalResponseMiddleware()` methods), you should be aware that *Variant 1* uses Laravel's `RequestSending` event to log HTTP requests. This event is fired **before** Global Middleware is executed. Therefore, any modifications to the request made by Global Middleware will not be logged. To overcome this, this package provides a middleware that you may add after your Global Middleware.
 
 You may add the middleware using the static `addRequestMiddleware()` method on the `HttpClientLogger` class:
 
@@ -191,19 +197,22 @@ So, my recommendation: If you need global logging without any extra configuratio
 
 - Obfuscation
 
-  - Body keys: Very basic obfuscation support using regex with lookbehind assertions (e.g. `/(?<="token":").*(?=")/mU`, modifying formatted log output. It's currently not possible to directly modify JSON data in request body.
+  - Body keys: Basic regex-based obfuscation of JSON-style (`"key":"value"`) and form/query-style (`key=value`) occurrences, modifying the formatted log output. This also covers query params in the request URI. It's currently not possible to directly modify JSON data in request body.
 
-  - No obfuscation of query params, e.g. on a POST request to an OAuth2 token endpoint.
+  - Header obfuscation is only applied to requests, body key obfuscation to both requests and responses.
 
-  - Obfuscation currently only works in variant 1 or 3 (global logging), and only on requests, not yet on response data.
+  - Obfuscation currently only works in variant 1 or 3 (global logging), not in the mixin variant.
 
 
 ## Testing
 
-Currently, there is very basic code/test coverage. We're using [PEST](https://pestphp.com/), so just run all tests like so:
+We're using [Pest](https://pestphp.com/) for testing, [Larastan](https://github.com/larastan/larastan) for static analysis, and [Pint](https://laravel.com/docs/pint) for code style:
 
 ```bash
-$ ./vendor/bin/pest
+$ composer test           # run the test suite
+$ composer test-coverage  # run the test suite with coverage report (requires pcov or Xdebug)
+$ composer analyse        # run static analysis
+$ composer lint           # check code style (use `composer format` to fix it)
 ```
 
 ## Changes

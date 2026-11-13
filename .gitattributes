@@ -1,0 +1,10 @@
+* text=auto eol=lf
+
+# Exclude development files from Composer dist archives
+/.github            export-ignore
+/tests              export-ignore
+/.gitattributes     export-ignore
+/.gitignore         export-ignore
+/phpstan.neon.dist  export-ignore
+/phpunit.xml.dist   export-ignore
+/pint.json          export-ignore

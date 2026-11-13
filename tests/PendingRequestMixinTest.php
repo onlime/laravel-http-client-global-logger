@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use GuzzleHttp\HandlerStack;
 use Illuminate\Http\Client\PendingRequest;
 use Illuminate\Support\Facades\Http;
@@ -18,5 +20,5 @@ it('rebuilds the guzzle handler stack to include the logger middleware at the bo
         ->and(invade($handler)->findByName('http-client-global-logger-request'))->toBeInt()
         ->and(invade($handler)->findByName('http-client-global-logger-response'))->toBeInt()
         ->and(fn () => invade($handler)->findByName('http-client-global-logger-0'))
-        ->toThrow(\InvalidArgumentException::class);
+        ->toThrow(InvalidArgumentException::class);
 });

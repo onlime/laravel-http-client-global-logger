@@ -1,67 +1,106 @@
 name: CI
 
-on: [push]
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
-  test:
+  quality:
+    name: Code style & static analysis
+    # Pushes to this repo already trigger a run, so only run pull requests from forks.
+    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name != github.repository
     runs-on: ubuntu-latest
-    strategy:
-      fail-fast: true
-      matrix:
-        php: [8.5, 8.4, 8.3, 8.2]
-        laravel: [13.*, 12.*]
-        stability: [prefer-lowest, prefer-stable]
-        os: [ubuntu-latest]
-        include:
-          - laravel: 13.*
-            testbench: 11.*
-          - laravel: 12.*
-            testbench: 10.*
-        exclude:
-          - php: 8.2
-            laravel: 13.*
-          - php: 8.4
-            stability: prefer-lowest
-          - php: 8.5
-            stability: prefer-lowest
-
-    name: PHP ${{ matrix.php }} - Laravel ${{ matrix.laravel }} - ${{ matrix.stability }}
+    timeout-minutes: 10
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v5
+        uses: actions/checkout@v7
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.5'
+          coverage: none
+          tools: composer:v2
+
+      - name: Install dependencies
+        run: composer update --prefer-dist --no-interaction --no-progress
+
+      - name: Check code style (Pint)
+        run: vendor/bin/pint --test
+
+      - name: Run static analysis (Larastan)
+        run: vendor/bin/phpstan analyse --memory-limit=1G --no-progress
+
+  test:
+    name: PHP ${{ matrix.php }} - Laravel ${{ matrix.laravel }} - ${{ matrix.stability }}
+    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name != github.repository
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    strategy:
+      fail-fast: false
+      matrix:
+        php: ['8.6', '8.5', '8.4', '8.3']
+        laravel: ['13.*', '12.*']
+        stability: [prefer-lowest, prefer-stable]
+        include:
+          - laravel: '13.*'
+            testbench: '11.*'
+          - laravel: '12.*'
+            testbench: '10.*'
+          - php: '8.5'
+            laravel: '13.*'
+            stability: prefer-stable
+            coverage: pcov
+        exclude:
+          # Laravel 12 supports PHP 8.2 - 8.5. On PHP 8.6, the test toolchain (Pest 5 / PHPUnit 13)
+          # requires Symfony 8 components, which Laravel 12 does not support.
+          - php: '8.6'
+            laravel: '12.*'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v7
 
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
           php-version: ${{ matrix.php }}
-          extensions: >
-            dom, curl, libxml, mbstring, zip, pcntl, pdo, sqlite, pdo_sqlite,
-            bcmath, soap, intl, gd, exif, iconv, imagick, fileinfo
-          coverage: xdebug
+          coverage: ${{ matrix.coverage || 'none' }}
+          tools: composer:v2
 
-      - name: Cache Composer dependencies
-        uses: actions/cache@v5
+      - name: Get Composer cache directory
+        id: composer-cache
+        run: echo "dir=$(composer config cache-files-dir)" >> "$GITHUB_OUTPUT"
+
+      - name: Cache Composer downloads
+        uses: actions/cache@v6
         with:
-          path: vendor
-          key: composer-${{ matrix.php }}-${{ matrix.laravel }}-${{ hashFiles('composer.lock') }}
-          restore-keys: composer-
+          path: ${{ steps.composer-cache.outputs.dir }}
+          key: composer-${{ runner.os }}-php${{ matrix.php }}-laravel${{ matrix.laravel }}-${{ matrix.stability }}-${{ hashFiles('composer.json') }}
+          restore-keys: composer-${{ runner.os }}-php${{ matrix.php }}-laravel${{ matrix.laravel }}-${{ matrix.stability }}-
 
       - name: Install dependencies
         run: |
-          composer require \
-            "laravel/framework:${{ matrix.laravel }}" \
-            "orchestra/testbench:${{ matrix.testbench }}" \
-            --dev --no-interaction --no-update
+          composer require "laravel/framework:${{ matrix.laravel }}" "orchestra/testbench:${{ matrix.testbench }}" --dev --no-interaction --no-update
+          composer update --${{ matrix.stability }} --prefer-dist --no-interaction --no-progress
 
-          composer update \
-            --${{ matrix.stability }} \
-            --prefer-dist --no-interaction
+      - name: List installed dependencies
+        run: composer show --direct
 
-      - name: Run tests (no coverage)
-        if: matrix.php != '8.4'
-        run: vendor/bin/pest
+      - name: Run tests
+        if: ${{ !matrix.coverage }}
+        run: vendor/bin/pest --ci
 
-      - name: Run tests with coverage (PHP 8.4 only)
-        if: matrix.php == '8.4'
-        run: vendor/bin/pest --coverage
+      - name: Run tests with coverage
+        if: ${{ matrix.coverage }}
+        run: vendor/bin/pest --ci --coverage
