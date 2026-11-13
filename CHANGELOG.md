@@ -1,6 +1,8 @@
 # CHANGELOG
 
-## [v1.5.0 (Unreleased)](https://github.com/onlime/laravel-http-client-global-logger/compare/v1.4.0...main)
+## [v1.5.x (Unreleased)](https://github.com/onlime/laravel-http-client-global-logger/compare/v1.5.0...main)
+
+## [v1.5.0 (2026-11-14)](https://github.com/onlime/laravel-http-client-global-logger/compare/v1.4.0...v1.5.0)
 
 - PHP 8.6 support
 - Drop PHP 8.2 support (end of life on 2026-12-31). PHP 8.2 users stay on v1.4.x.
