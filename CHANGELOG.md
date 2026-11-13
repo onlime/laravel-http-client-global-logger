@@ -1,6 +1,18 @@
 # CHANGELOG
 
-## [v1.4.x (Unreleased)](https://github.com/onlime/laravel-http-client-global-logger/compare/v1.4.0...main)
+## [v1.5.0 (Unreleased)](https://github.com/onlime/laravel-http-client-global-logger/compare/v1.4.0...main)
+
+- PHP 8.6 support
+- Drop PHP 8.2 support (end of life on 2026-12-31). PHP 8.2 users stay on v1.4.x.
+- Pest v5 support, dropped Pest v3. Removed unused `pestphp/pest-plugin-arch` and `pestphp/pest-plugin-laravel` dev dependencies.
+- Bumped dev dependencies (`laravel/pint` `^1.32`, `saloonphp/laravel-plugin` `^4.3 || ^5.0`, `spatie/invade` `^2.2`). Verified compatibility with Guzzle 8 and `guzzlehttp/psr7` v3.
+- Added static analysis with [Larastan](https://github.com/larastan/larastan) (PHPStan level 8), `declare(strict_types=1)` and return types everywhere.
+- Fixed response body trimming to accept any PSR-7 `ResponseInterface`, not only Guzzle's `Response` implementation.
+- Body obfuscation now throws a `RuntimeException` (instead of a `TypeError`) if a regex fails, never logging the unobfuscated message.
+- `EventHelper` now throws an `InvalidArgumentException` for unsupported events.
+- CI: Added PHP 8.6 to the matrix, code style and static analysis job, pull requests from forks, concurrency, Composer download cache, coverage on a single job. Bumped `actions/checkout` to v7 and `actions/cache` to v6, added Dependabot for GitHub Actions.
+- Added `.gitattributes` to exclude development files from Composer dist archives.
+- PHPUnit configuration: Coverage reports are no longer generated on every test run, use `composer test-coverage` instead.
 
 ## [v1.4.0 (2026-04-20)](https://github.com/onlime/laravel-http-client-global-logger/compare/v1.3.0...v1.4.0)
 
