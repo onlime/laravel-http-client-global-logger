@@ -38,6 +38,7 @@
         "monolog/monolog": "^3.9"
     },
     "require-dev": {
+        "larastan/larastan": "^3.15",
         "laravel/framework": "^12.0 || ^13.0",
         "laravel/pint": "^1.32",
         "orchestra/testbench": "^10.0 || ^11.0",
@@ -63,7 +64,9 @@
         "pretest": "@testbench:reset",
         "test": "vendor/bin/pest",
         "test-coverage": "vendor/bin/pest --coverage --coverage-html=build/coverage",
-        "format": "vendor/bin/pint"
+        "analyse": "vendor/bin/phpstan analyse --memory-limit=1G",
+        "format": "vendor/bin/pint",
+        "lint": "vendor/bin/pint --test"
     },
     "config": {
         "sort-packages": true,

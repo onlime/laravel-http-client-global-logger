@@ -11,13 +11,13 @@ use Monolog\Handler\StreamHandler;
 use Onlime\LaravelHttpClientGlobalLogger\Listeners\LogRequestSending;
 use Onlime\LaravelHttpClientGlobalLogger\Listeners\LogResponseReceived;
 use Onlime\LaravelHttpClientGlobalLogger\Mixins\PendingRequestMixin;
+use Saloon\Laravel\Events\SendingSaloonRequest;
+use Saloon\Laravel\Events\SentSaloonRequest;
+use Saloon\Laravel\SaloonServiceProvider;
 
 class ServiceProvider extends BaseServiceProvider
 {
-    /**
-     * {@inheritdoc}
-     */
-    public function register()
+    public function register(): void
     {
         $this->mergeConfigFrom($this->configFileLocation(), 'http-client-global-logger');
 
@@ -34,13 +34,13 @@ class ServiceProvider extends BaseServiceProvider
         Event::listen(ResponseReceived::class, LogResponseReceived::class);
 
         // Saloon
-        if (class_exists(\Saloon\Laravel\SaloonServiceProvider::class)) {
-            Event::listen(\Saloon\Laravel\Events\SendingSaloonRequest::class, LogRequestSending::class);
-            Event::listen(\Saloon\Laravel\Events\SentSaloonRequest::class, LogResponseReceived::class);
+        if (class_exists(SaloonServiceProvider::class)) {
+            Event::listen(SendingSaloonRequest::class, LogRequestSending::class);
+            Event::listen(SentSaloonRequest::class, LogResponseReceived::class);
         }
     }
 
-    public function boot()
+    public function boot(): void
     {
         $this->publishes([
             $this->configFileLocation() => config_path('http-client-global-logger.php'),
@@ -71,6 +71,6 @@ class ServiceProvider extends BaseServiceProvider
      */
     protected function configFileLocation(): string
     {
-        return realpath(__DIR__.'/../../config/http-client-global-logger.php');
+        return dirname(__DIR__, 2).'/config/http-client-global-logger.php';
     }
 }

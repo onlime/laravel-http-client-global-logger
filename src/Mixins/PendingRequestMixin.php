@@ -2,6 +2,7 @@
 
 namespace Onlime\LaravelHttpClientGlobalLogger\Mixins;
 
+use Closure;
 use GuzzleHttp\MessageFormatter;
 use GuzzleHttp\Middleware;
 use Illuminate\Http\Client\PendingRequest;
@@ -11,7 +12,7 @@ use Monolog\Logger;
 /** @mixin PendingRequest */
 class PendingRequestMixin
 {
-    public function log()
+    public function log(): Closure
     {
         /**
          * @param  string|null  $name  logger name

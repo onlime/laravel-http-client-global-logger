@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Onlime\LaravelHttpClientGlobalLogger\Listeners;
 
 use GuzzleHttp\MessageFormatter;
-use GuzzleHttp\Psr7\Response;
 use GuzzleHttp\Psr7\Utils;
 use Illuminate\Http\Client\Events\ResponseReceived;
 use Illuminate\Support\Facades\Log;
@@ -13,7 +12,7 @@ use Illuminate\Support\Str;
 use Onlime\LaravelHttpClientGlobalLogger\EventHelper;
 use Onlime\LaravelHttpClientGlobalLogger\Support\UrlFilter;
 use Onlime\LaravelHttpClientGlobalLogger\Traits\ObfuscatesBody;
-use Psr\Http\Message\MessageInterface;
+use Psr\Http\Message\ResponseInterface;
 use Saloon\Laravel\Events\SentSaloonRequest;
 
 class LogResponseReceived
@@ -52,7 +51,7 @@ class LogResponseReceived
     /**
      * Trim the response body when it's too long.
      */
-    private function trimBody(Response $psrResponse, bool $trimAlways = false): Response|MessageInterface
+    private function trimBody(ResponseInterface $psrResponse, bool $trimAlways = false): ResponseInterface
     {
         // Check if trimming is enabled
         if (! config('http-client-global-logger.trim_response_body.enabled')) {
@@ -73,7 +72,7 @@ class LogResponseReceived
             );
 
             // Check if the content type is whitelisted
-            if (in_array($contentTypeHeader, $whiteListedContentTypes)) {
+            if (in_array($contentTypeHeader, $whiteListedContentTypes, true)) {
                 return $psrResponse;
             }
         }
@@ -84,7 +83,7 @@ class LogResponseReceived
         return ($psrResponse->getBody()->getSize() <= $limit)
             ? $psrResponse
             : $psrResponse->withBody(Utils::streamFor(
-                Str::limit($psrResponse->getBody(), $limit)
+                Str::limit((string) $psrResponse->getBody(), $limit)
             ));
     }
 }

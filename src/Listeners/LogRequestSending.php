@@ -42,7 +42,7 @@ class LogRequestSending
             return;
         }
 
-        $obfuscate  = config('http-client-global-logger.obfuscate.enabled');
+        $obfuscate = config('http-client-global-logger.obfuscate.enabled');
 
         if ($obfuscate) {
             $psrRequest = $this->obfuscateHeaders($psrRequest);
