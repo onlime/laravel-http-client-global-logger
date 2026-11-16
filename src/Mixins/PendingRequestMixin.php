@@ -25,23 +25,19 @@ class PendingRequestMixin
                 return $this;
             }
 
-            $stack = $this->buildHandlerStack();
-
             /** @var Logger $logger */
             $logger = Log::channel(config('http-client-global-logger.channel'));
             if (! is_null($name)) {
                 $logger = $logger->withName($name);
             }
 
-            foreach (config('http-client-global-logger.format') as $key => $format) {
-                // We'll use unshift instead of push, to add the middleware to the bottom of the stack, not the top
-                $stack->unshift(
-                    Middleware::log($logger, new MessageFormatter($format)),
-                    'http-client-global-logger-'.$key
-                );
+            // Both are logged once the response is received, the first middleware added last.
+            // Reversed, so that the request is logged before the response.
+            foreach (array_reverse(config('http-client-global-logger.format')) as $format) {
+                $this->withMiddleware(Middleware::log($logger, new MessageFormatter($format)));
             }
 
-            return $this->withOptions(['handler' => $stack]);
+            return $this;
         };
     }
 }
