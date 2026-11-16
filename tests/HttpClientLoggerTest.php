@@ -165,7 +165,7 @@ it('obfuscates request header and body', function (string $body, string $expecte
 
     $logger->shouldReceive('info')->withArgs(function ($message) use ($expected) {
         expect($message)->toContain("REQUEST: POST https://example.com\r\n")
-            ->and($message)->toContain("Authorization: **********\r\n")
+            ->and($message)->toContain("Authorization: [redacted]\r\n")
             ->and($message)->toContain($expected);
         return true;
     })->once();
@@ -184,14 +184,14 @@ it('obfuscates request header and body', function (string $body, string $expecte
         ->post('https://example.com');
 })->with([
     'json-style' => [
-        '{"key":"value","apikey":"s3cr3tK3y","token":"s0meT0k3n"}',
-        '{"key":"value","apikey":"**********","token":"**********"}',
+        '{"name":"value","apikey":"s3cr3tK3y","token":"s0meT0k3n"}',
+        '{"name":"value","apikey":"[redacted]","token":"[redacted]"}',
     ],
     // OpenID Connect example for POST /token endpoint
     // see https://openid.net/specs/openid-connect-core-1_0.html#RefreshingAccessToken
     'form-style-openid' => [
         'grant_type=refresh_token&refresh_token=r3fr3shT0k3n&client_id=1234&client_secret=53cr3t',
-        'grant_type=refresh_token&refresh_token=**********&client_id=1234&client_secret=**********',
+        'grant_type=refresh_token&refresh_token=[redacted]&client_id=1234&client_secret=[redacted]',
     ],
 ]);
 
@@ -221,7 +221,7 @@ it('obfuscates request uri via body obfuscation', function (string $uri, string 
     ],
     'sensitive-query-param' => [
         'https://example.com?access_key=1234',
-        'https://example.com?access_key=**********',
+        'https://example.com?access_key=[redacted]',
     ],
     'other-query-param' => [
         'https://example.com?foo=bar&baz=qux',
@@ -229,7 +229,7 @@ it('obfuscates request uri via body obfuscation', function (string $uri, string 
     ],
     'mixed-query-params' => [
         'https://example.com?token=xyz&foo=bar&access_key=1234',
-        'https://example.com?token=**********&foo=bar&access_key=**********',
+        'https://example.com?token=[redacted]&foo=bar&access_key=[redacted]',
     ],
 ]);
 
@@ -298,11 +298,11 @@ it('obfuscates response body', function (string $body, string $expected) {
 })->with([
     'json-style-openid' => [
         '{"access_token":"s0meT0k3n-1","expires_in":300,"refresh_token":"s0meT0k3n-2","token_type":"Bearer","id_token":"s0meT0k3n-3","session_state":"1234-56","scope":"foo bar"}',
-        '{"access_token":"**********","expires_in":300,"refresh_token":"**********","token_type":"Bearer","id_token":"**********","session_state":"1234-56","scope":"foo bar"}',
+        '{"access_token":"[redacted]","expires_in":300,"refresh_token":"[redacted]","token_type":"[redacted]","id_token":"[redacted]","session_state":"1234-56","scope":"foo bar"}',
     ],
     'form-style' => [
         'grant_type=refresh_token&refresh_token=r3fr3shT0k3n&client_id=1234&client_secret=53cr3t',
-        'grant_type=refresh_token&refresh_token=**********&client_id=1234&client_secret=**********',
+        'grant_type=refresh_token&refresh_token=[redacted]&client_id=1234&client_secret=[redacted]',
     ],
 ]);
 

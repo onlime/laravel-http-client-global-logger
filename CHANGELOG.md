@@ -2,8 +2,21 @@
 
 ## [v1.6.0 (Unreleased)](https://github.com/onlime/laravel-http-client-global-logger/compare/v1.5.0...main)
 
+- [Security] Obfuscation of more credentials by default, see the new [Sensitive data](README.md#sensitive-data) section in the README:
+  - Header and body key patterns are case-insensitive now, and support wildcards using `*`, e.g. `*token*`.
+  - New `HTTP_CLIENT_GLOBAL_LOGGER_OBFUSCATE_HEADERS` default `*authorization,*cookie,*token*,*key,*secret*` (was `Authorization`), e.g. `Proxy-Authorization`, `Cookie`, `PRIVATE-TOKEN` or `X-Api-Key`.
+  - New `HTTP_CLIENT_GLOBAL_LOGGER_OBFUSCATE_BODY_KEYS` default `pass,*password*,*token*,*secret*,*key,*signature*,sig` (was `pass,password,token,apikey,access_token,access_key,refresh_token,id_token,client_secret`), e.g. `accessToken`, `api_key`, `key`, `private_key`, `password_confirmation` or `X-Amz-Signature`.
+  - Response headers are obfuscated too, e.g. `Set-Cookie`.
+  - The password in the URL is obfuscated, e.g. `https://user:[redacted]@example.com`.
+  - Password hashes are obfuscated anywhere, except for their algorithm identifier, e.g. `$2y$[redacted]` or `$argon2id$[redacted]`, like in [onlime/laravel-sql-reporter](https://github.com/onlime/laravel-sql-reporter).
+  - JSON values with escaped quotes (`\"`) are obfuscated entirely, and so are values cut off by trimming the response body.
+  - Whitespace around the comma-separated patterns is ignored, e.g. `Authorization, Cookie`.
+- [Security] The mixin variant (`Http::log()`) obfuscates credentials like the global logging variants.
 - Fixed the mixin variant on Guzzle 8, where `Http::log()` threw an `InvalidArgumentException` (`The "handler" request option is not supported`) before sending the request.
 - A failure while logging (e.g. an unwritable log file) is reported, and no longer breaks the HTTP request.
+- New `HTTP_CLIENT_GLOBAL_LOGGER_OBFUSCATE_REPLACEMENT` default `[redacted]` (was `**********`), like [onlime/laravel-sql-reporter](https://github.com/onlime/laravel-sql-reporter). It is inserted literally now, a replacement like `$1` or `0000` no longer breaks the log line.
+- Replaced the `ObfuscatesBody` trait and `LogRequestSending::obfuscateHeaders()` by the new `Support\ObfuscatingMessageFormatter`, used by all variants.
+- README: new "Sensitive data" and "Upgrading" sections.
 
 ## [v1.5.0 (2026-11-14)](https://github.com/onlime/laravel-http-client-global-logger/compare/v1.4.0...v1.5.0)
 

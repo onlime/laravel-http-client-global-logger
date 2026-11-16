@@ -5,11 +5,11 @@ declare(strict_types=1);
 namespace Onlime\LaravelHttpClientGlobalLogger\Mixins;
 
 use Closure;
-use GuzzleHttp\MessageFormatter;
 use GuzzleHttp\Middleware;
 use Illuminate\Http\Client\PendingRequest;
 use Illuminate\Support\Facades\Log;
 use Monolog\Logger;
+use Onlime\LaravelHttpClientGlobalLogger\Support\ObfuscatingMessageFormatter;
 
 /** @mixin PendingRequest */
 class PendingRequestMixin
@@ -34,7 +34,7 @@ class PendingRequestMixin
             // Both are logged once the response is received, the first middleware added last.
             // Reversed, so that the request is logged before the response.
             foreach (array_reverse(config('http-client-global-logger.format')) as $format) {
-                $this->withMiddleware(Middleware::log($logger, new MessageFormatter($format)));
+                $this->withMiddleware(Middleware::log($logger, new ObfuscatingMessageFormatter($format)));
             }
 
             return $this;

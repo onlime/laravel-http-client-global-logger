@@ -42,6 +42,8 @@ You may override its configuration in your `.env` - the following environment va
 - `HTTP_CLIENT_GLOBAL_LOGGER_EXCEPT` (string, comma-separated URL patterns with wildcard support)
 - `HTTP_CLIENT_GLOBAL_LOGGER_OBFUSCATE_ENABLED` (bool)
 - `HTTP_CLIENT_GLOBAL_LOGGER_OBFUSCATE_REPLACEMENT` (string)
+- `HTTP_CLIENT_GLOBAL_LOGGER_OBFUSCATE_HEADERS` (string, comma-separated header name patterns with wildcard support)
+- `HTTP_CLIENT_GLOBAL_LOGGER_OBFUSCATE_BODY_KEYS` (string, comma-separated key patterns with wildcard support)
 - `HTTP_CLIENT_GLOBAL_LOGGER_TRIM_RESPONSE_BODY_ENABLED` (bool)
 - `HTTP_CLIENT_GLOBAL_LOGGER_TRIM_RESPONSE_BODY_LIMIT` (int)
 - `HTTP_CLIENT_GLOBAL_LOGGER_TRIM_RESPONSE_BODY_CONTENT_TYPE_WHITELIST` (string)
@@ -55,7 +57,7 @@ Using the logger will log both the request and response of an external HTTP requ
 - Multi-line log records that contain full request/response information (including all headers and body)
 - Logging into separate logfile `http-client.log`. You're free to override this and use your own logging channel or just log to a different logfile.
 - Full support of [Guzzle MessageFormatter](https://github.com/guzzle/guzzle/blob/master/src/MessageFormatter.php) variable substitutions for highly customized log messages.
-- Basic obfuscation of credentials in HTTP Client requests (both by header or body keys)
+- Obfuscation of credentials in headers, URL and body (JSON or form), see [Sensitive data](#sensitive-data)
 - URL exclusion patterns to skip logging for specific URLs (e.g. `HTTP_CLIENT_GLOBAL_LOGGER_EXCEPT=https://api.pirsch.io/*,https://sentry.io/*`)
 - Trimming of response body content to a certain length with support for `Content-Type` whitelisting
 - Enforce trimming of response body content by setting a `X-Global-Logger-Trim-Always` request header, which will ignore the whitelisting.
@@ -63,7 +65,6 @@ Using the logger will log both the request and response of an external HTTP requ
   - Zero-configuration: Global logging is enabled by default in this package.
   - Simple and performant implementation using `RequestSending` / `ResponseReceived` event listeners
   - Also logs [Saloon](https://docs.saloon.dev/) requests if [saloonphp/laravel-plugin](https://github.com/saloonphp/laravel-plugin) is installed
-  - Obfuscation of common credentials passed in request (e.g. `Authorization` header's Bearer token)
 - **Variant 2: Mixin** (`HTTP_CLIENT_GLOBAL_LOGGER_MIXIN=true`)
   - Enabled only on individual HTTP Client instances, using `Http::log()` - no global logging.
   - Log channel name can be set per HTTP Client instance by passing a name to `Http::log($name)`
@@ -159,7 +160,7 @@ Log entry example:
 GET /user HTTP/1.1
 User-Agent: GuzzleHttp/7
 Host: example.com
-Authorization: Bearer *******************
+Authorization: [redacted]
 [2021-07-11 11:29:58] local.INFO: RESPONSE: HTTP/1.1 200 OK
 HTTP/1.1 200 OK
 Date: Fri, 18 Jun 2021 09:29:58 GMT
@@ -195,14 +196,31 @@ So, my recommendation: If you need global logging without any extra configuratio
 
   As a workaround, I have implemented another way of logging through `Http::log()` method as mixin. But of course, we should combine both variants into a single one for a cleaner codebase.
 
-- Obfuscation
+## Sensitive data
 
-  - Body keys: Basic regex-based obfuscation of JSON-style (`"key":"value"`) and form/query-style (`key=value`) occurrences, modifying the formatted log output. This also covers query params in the request URI. It's currently not possible to directly modify JSON data in request body.
+The log contains full requests and responses, including all headers and bodies. Credentials are obfuscated by default (`HTTP_CLIENT_GLOBAL_LOGGER_OBFUSCATE_ENABLED`), in all 3 variants, replaced by `[redacted]` (`HTTP_CLIENT_GLOBAL_LOGGER_OBFUSCATE_REPLACEMENT`):
 
-  - Header obfuscation is only applied to requests, body key obfuscation to both requests and responses.
+- **Headers** of requests and responses whose name matches `HTTP_CLIENT_GLOBAL_LOGGER_OBFUSCATE_HEADERS`, defaults to `*authorization,*cookie,*token*,*key,*secret*`. E.g. `Authorization`, `Proxy-Authorization`, `Cookie`, `Set-Cookie`, `PRIVATE-TOKEN` or `X-Api-Key`.
+- **Values of body keys** whose name matches `HTTP_CLIENT_GLOBAL_LOGGER_OBFUSCATE_BODY_KEYS`, defaults to `pass,*password*,*token*,*secret*,*key,*signature*,sig`. They are replaced in JSON-style (`"key":"value"`) and form/query-style (`key=value`) text of the formatted message, which covers JSON and form bodies, and the query string of the URL. E.g. `{"password":"[redacted]"}`, `refresh_token=[redacted]` or `?api_key=[redacted]`.
+- **The password in the URL**, e.g. `https://user:[redacted]@example.com`.
+- **Password hashes** in the modular crypt format (`$<identifier>$…`), anywhere except for their algorithm identifier, also in the values of the body keys above, like in [onlime/laravel-sql-reporter](https://github.com/onlime/laravel-sql-reporter). E.g. `$2y$[redacted]` (bcrypt), `$argon2id$[redacted]`, or legacy ones like `$6$[redacted]` (SHA-512-crypt) or `$P$[redacted]` (phpass).
 
-  - Obfuscation currently only works in variant 1 or 3 (global logging), not in the mixin variant.
+Patterns are comma-separated, case-insensitive, and support wildcards using `*` (see [`Str::is()`](https://laravel.com/docs/strings#method-str-is)). A wildcard also matches the brackets of nested form keys, e.g. `user[password]` for `*password*`.
 
+Not obfuscated:
+
+- Keys and headers with other names. Add them to the patterns above.
+- Other body formats, e.g. XML or `multipart/form-data`. Exclude such URLs from logging with `HTTP_CLIENT_GLOBAL_LOGGER_EXCEPT`.
+- Numeric JSON values, e.g. `{"pin":1234}`.
+- URL-encoded password hashes (`%242y%24…`) in the values of other keys.
+
+Protect the log file like any other log of your application: it is created with the same permissions as Laravel's own logs. If writing the log fails, the exception is reported and the HTTP request is sent as usual.
+
+## Upgrading
+
+### v1.6.0
+
+The defaults of `HTTP_CLIENT_GLOBAL_LOGGER_OBFUSCATE_HEADERS`, `HTTP_CLIENT_GLOBAL_LOGGER_OBFUSCATE_BODY_KEYS` and `HTTP_CLIENT_GLOBAL_LOGGER_OBFUSCATE_REPLACEMENT` have changed. If you set any of them in your `.env`, or published the config file, compare them with the new defaults in [`config/http-client-global-logger.php`](config/http-client-global-logger.php), as your values replace them. Matching is case-insensitive now, with wildcard support, so your existing names keep working.
 
 ## Testing
 
