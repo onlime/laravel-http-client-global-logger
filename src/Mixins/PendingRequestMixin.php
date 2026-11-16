@@ -33,8 +33,13 @@ class PendingRequestMixin
 
             // Both are logged once the response is received, the first middleware added last.
             // Reversed, so that the request is logged before the response.
-            foreach (array_reverse(config('http-client-global-logger.format')) as $format) {
-                $this->withMiddleware(Middleware::log($logger, new ObfuscatingMessageFormatter($format)));
+            // Like withMiddleware(), but named, so that calling log() again replaces them.
+            foreach (array_reverse(config('http-client-global-logger.format')) as $key => $format) {
+                // @phpstan-ignore property.notFound ($this is the PendingRequest, its middleware property is protected)
+                $this->middleware->put(
+                    'http-client-global-logger-'.$key,
+                    Middleware::log($logger, new ObfuscatingMessageFormatter($format))
+                );
             }
 
             return $this;

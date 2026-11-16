@@ -36,3 +36,17 @@ it('logs the obfuscated request and response with Http::log()', function () {
         ->and($messages[1])->toStartWith('RESPONSE: HTTP/1.1 200 OK')
         ->and(implode("\n", $messages))->not->toContain('s3cr3t');
 });
+
+it('logs only once when Http::log() is called again', function () {
+    PendingRequest::mixin(new PendingRequestMixin);
+
+    Event::forget(RequestSending::class);
+    Event::forget(ResponseReceived::class);
+
+    $logger = Mockery::mock(LoggerInterface::class);
+    $logger->shouldReceive('log')->twice()->with('info', Mockery::type('string'));
+    Log::shouldReceive('channel')->with('http-client')->andReturn($logger);
+
+    $client = Http::fake()->log();
+    $client->log()->get('https://example.com');
+});
