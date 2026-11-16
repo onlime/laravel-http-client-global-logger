@@ -32,31 +32,33 @@ class LogRequestSending
     }
 
     /**
-     * Handle the event.
+     * Handle the event. Any failure is reported, never breaking the HTTP request.
      */
     public function handleEvent(RequestSending|SendingSaloonRequest $event): void
     {
-        $psrRequest = EventHelper::getPsrRequest($event);
+        rescue(function () use ($event) {
+            $psrRequest = EventHelper::getPsrRequest($event);
 
-        if (! UrlFilter::shouldLog($psrRequest)) {
-            return;
-        }
+            if (! UrlFilter::shouldLog($psrRequest)) {
+                return;
+            }
 
-        $obfuscate = config('http-client-global-logger.obfuscate.enabled');
+            $obfuscate = config('http-client-global-logger.obfuscate.enabled');
 
-        if ($obfuscate) {
-            $psrRequest = $this->obfuscateHeaders($psrRequest);
-        }
+            if ($obfuscate) {
+                $psrRequest = $this->obfuscateHeaders($psrRequest);
+            }
 
-        $formatter = new MessageFormatter(config('http-client-global-logger.format.request'));
-        $message = $formatter->format($psrRequest);
+            $formatter = new MessageFormatter(config('http-client-global-logger.format.request'));
+            $message = $formatter->format($psrRequest);
 
-        if ($obfuscate) {
-            $message = $this->obfuscateBody($message);
-        }
+            if ($obfuscate) {
+                $message = $this->obfuscateBody($message);
+            }
 
-        Log::channel(config('http-client-global-logger.channel'))
-            ->info($message);
+            Log::channel(config('http-client-global-logger.channel'))
+                ->info($message);
+        });
     }
 
     /**

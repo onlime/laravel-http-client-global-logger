@@ -1,6 +1,8 @@
 # CHANGELOG
 
-## [v1.5.x (Unreleased)](https://github.com/onlime/laravel-http-client-global-logger/compare/v1.5.0...main)
+## [v1.6.0 (Unreleased)](https://github.com/onlime/laravel-http-client-global-logger/compare/v1.5.0...main)
+
+- A failure while logging (e.g. an unwritable log file) is reported, and no longer breaks the HTTP request.
 
 ## [v1.5.0 (2026-11-14)](https://github.com/onlime/laravel-http-client-global-logger/compare/v1.4.0...v1.5.0)
 

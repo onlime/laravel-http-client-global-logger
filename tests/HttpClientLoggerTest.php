@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use Illuminate\Support\Facades\Exceptions;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Mockery\MockInterface;
@@ -16,6 +17,9 @@ function setupLogger(): MockInterface
     $logger = Mockery::mock(LoggerInterface::class);
 
     Log::shouldReceive('channel')->with('http-client')->andReturn($logger);
+
+    // Rethrow what the listeners report, e.g. a failed expectation, instead of logging it
+    Log::shouldReceive('error')->andReturnUsing(fn (string $message, array $context) => throw $context['exception']);
 
     return $logger;
 }
@@ -301,3 +305,16 @@ it('obfuscates response body', function (string $body, string $expected) {
         'grant_type=refresh_token&refresh_token=**********&client_id=1234&client_secret=**********',
     ],
 ]);
+
+it('reports a logging failure without breaking the request', function () {
+    Exceptions::fake();
+
+    // An unwritable log file, e.g. one created by root
+    config(['logging.channels.http-client.with.stream' => '/dev/null/http-client.log']);
+    Log::forgetChannel('http-client');
+
+    $response = Http::fake()->get('https://example.com');
+
+    expect($response->ok())->toBeTrue();
+    Exceptions::assertReported(UnexpectedValueException::class);
+});

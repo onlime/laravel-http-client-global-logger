@@ -20,32 +20,34 @@ class LogResponseReceived
     use ObfuscatesBody;
 
     /**
-     * Handle the event.
+     * Handle the event. Any failure is reported, never breaking the HTTP request.
      */
     public function handle(ResponseReceived|SentSaloonRequest $event): void
     {
-        $psrRequest = EventHelper::getPsrRequest($event);
+        rescue(function () use ($event) {
+            $psrRequest = EventHelper::getPsrRequest($event);
 
-        if (! UrlFilter::shouldLog($psrRequest)) {
-            return;
-        }
+            if (! UrlFilter::shouldLog($psrRequest)) {
+                return;
+            }
 
-        $formatter = new MessageFormatter(config('http-client-global-logger.format.response'));
+            $formatter = new MessageFormatter(config('http-client-global-logger.format.response'));
 
-        $message = $formatter->format(
-            $psrRequest,
-            $this->trimBody(
-                EventHelper::getPsrResponse($event),
-                $psrRequest->hasHeader('X-Global-Logger-Trim-Always')
-            )
-        );
+            $message = $formatter->format(
+                $psrRequest,
+                $this->trimBody(
+                    EventHelper::getPsrResponse($event),
+                    $psrRequest->hasHeader('X-Global-Logger-Trim-Always')
+                )
+            );
 
-        if (config('http-client-global-logger.obfuscate.enabled')) {
-            $message = $this->obfuscateBody($message);
-        }
+            if (config('http-client-global-logger.obfuscate.enabled')) {
+                $message = $this->obfuscateBody($message);
+            }
 
-        Log::channel(config('http-client-global-logger.channel'))
-            ->info($message);
+            Log::channel(config('http-client-global-logger.channel'))
+                ->info($message);
+        });
     }
 
     /**
