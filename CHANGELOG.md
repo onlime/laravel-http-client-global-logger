@@ -1,6 +1,8 @@
 # CHANGELOG
 
-## [v1.6.0 (Unreleased)](https://github.com/onlime/laravel-http-client-global-logger/compare/v1.5.0...main)
+## [v1.6.x (Unreleased)](https://github.com/onlime/laravel-http-client-global-logger/compare/v1.6.0...main)
+
+## [v1.6.0 (2026-11-17)](https://github.com/onlime/laravel-http-client-global-logger/compare/v1.5.0...v1.6.0)
 
 - [Security] Obfuscation of more credentials by default, see the new [Sensitive data](README.md#sensitive-data) section in the README:
   - Header and body key patterns are case-insensitive now, and support wildcards using `*`, e.g. `*token*`.
