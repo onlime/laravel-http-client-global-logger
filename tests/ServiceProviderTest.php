@@ -55,6 +55,9 @@ it('can publish the config file', function () {
     $this->artisan('vendor:publish', ['--tag' => 'http-client-global-logger']);
 
     $this->assertFileExists(config_path('http-client-global-logger.php'));
+
+    // Don't leave it in the Testbench skeleton, where it would override the package defaults in later runs
+    unlink(config_path('http-client-global-logger.php'));
 });
 
 it('configures the log channel', function () {

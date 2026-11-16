@@ -60,7 +60,7 @@
         }
     },
     "scripts": {
-        "testbench:reset": "echo RESETTING TESTBENCH; rm -rf vendor/orchestra/testbench-core/laravel-foo",
+        "testbench:reset": "echo RESETTING TESTBENCH; rm -f vendor/orchestra/testbench-core/laravel/config/http-client-global-logger.php",
         "pretest": "@testbench:reset",
         "test": "vendor/bin/pest",
         "test-coverage": "vendor/bin/pest --coverage --coverage-html=build/coverage",
