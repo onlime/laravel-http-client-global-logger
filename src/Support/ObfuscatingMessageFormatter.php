@@ -28,12 +28,14 @@ class ObfuscatingMessageFormatter implements MessageFormatterInterface
     private const string WILDCARD = '[\w.%\[\]-]*';
 
     /**
-     * A password hash in the modular crypt format, $<identifier>$…, e.g. $2y$ (bcrypt), $argon2id$, or legacy ones like
-     * $1$ (MD5-crypt), $6$ (SHA-512-crypt) or $P$ (phpass), with at least 16 more characters up to the end of a JSON
-     * string, form value or XML element, unlike short or spaced values like $5$ or $x$ + $y$. Its identifier is the
-     * first group. Like in onlime/laravel-sql-reporter, only its identifier is kept, e.g. $2y$[redacted].
+     * A password hash in the modular crypt format, $<identifier>$…, of a known algorithm: $2y$ (bcrypt, also $2$, $2a$,
+     * $2b$, $2x$), $argon2id$ (also $argon2i$, $argon2d$), $y$ and $gy$ (yescrypt), $7$ (scrypt), or legacy ones like
+     * $1$ (MD5-crypt), $5$ and $6$ (SHA-256/512-crypt), $P$ and $H$ (phpass), $sha1$ or $md5$. It is followed by at
+     * least 16 characters of a hash, also a JSON-escaped slash (\/), unlike short or spaced values like $5$ or $x$ + $y$.
+     * Its identifier is the first group, the only part kept, e.g. $2y$[redacted]. Only known ones are kept, as any other
+     * part of a value like $Summer-2024$… could be part of a password.
      */
-    private const string HASH = '(\$[\w-]+\$)[^\s"\'&<]{16,}';
+    private const string HASH = '(\$(?:2[abxy]?|argon2id|argon2i|argon2d|y|gy|7|1|5|6|P|H|sha1|md5)\$)[\w.\/\\\\+=,$-]{16,}';
 
     private string $replacement;
 

@@ -106,6 +106,16 @@ it('keeps only the algorithm identifier of password hashes', function (string $b
         '<hash>$2y$12$R9h/cIPz0gi.URNNX3kh2OPST9/PgBkqquzi.Ss7KIUgO2t0jWMUW</hash><name>Alice</name>',
         '<hash>$2y$[redacted]</hash><name>Alice</name>',
     ],
+    // Only the identifier of a known algorithm is kept, as the rest could be part of a password
+    'unknown identifier' => [
+        '{"password":"$Summer-2024$Abcdefghijklmnop1","name":"$MyName$0123456789abcdefgh"}&password=$MyPass$0123456789abcdefgh',
+        '{"password":"[redacted]","name":"$MyName$0123456789abcdefgh"}&password=[redacted]',
+    ],
+    // Only the characters of a hash are redacted
+    'text' => [
+        'at Outer$Inner$1.run(Outer.java:42) with $1$saltsalt$abcdefghijklmnop (MD5-crypt)',
+        'at Outer$Inner$1.run(Outer.java:42) with $1$[redacted] (MD5-crypt)',
+    ],
 ]);
 
 it('stays within PCRE limits on long values', function (string $body, string $expected) {
