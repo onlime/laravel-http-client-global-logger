@@ -118,6 +118,8 @@ class ObfuscatingMessageFormatter implements MessageFormatterInterface
      */
     private function obfuscateMessage(string $message): string
     {
+        $jsonKeys = $formKeys = [];
+
         foreach ($this->patterns('body_keys') as $pattern) {
             // A leading wildcard is left out, so that the match may start anywhere in a key, e.g. at 'Signature' in
             // 'X-Amz-Signature='. Matching it would get slow on long values. Without one, the key starts at a quote
@@ -125,17 +127,25 @@ class ObfuscatingMessageFormatter implements MessageFormatterInterface
             $leadingWildcard = str_starts_with($pattern, '*');
             $key = str_replace('\*', self::WILDCARD, preg_quote(ltrim($pattern, '*'), '/'));
 
+            $jsonKeys[] = ($leadingWildcard ? '' : '"').$key;
+            $formKeys[] = ($leadingWildcard ? '' : '\b').$key;
+        }
+
+        // All keys are matched by a single regex per style: it stays fast without PCRE's JIT, also with many matches,
+        // and a value replaced for one key can't hide another one. Without any keys, it would match all values.
+        if ($jsonKeys !== []) {
             // 1. JSON-style: "key":"value"
             // The value is matched up to its closing quote, skipping escaped characters like \" or \\.
             // A value without closing quote (cut off by trimming the response body) is matched up to the end.
             // The possessive *+ (no backtracking) keeps values with many escaped characters within PCRE's limits,
             // up to hundreds of thousands of them without PCRE's JIT. Beyond, format() leaves out the body.
-            $jsonKey = ($leadingWildcard ? '' : '"').$key;
-            $message = $this->replaceValues('/('.$jsonKey.'"\s*:\s*")(\\\\.|[^"\\\\]+)*+/is', $message);
+            $jsonRegex = '/((?:'.implode('|', $jsonKeys).')"\s*:\s*")(\\\\.|[^"\\\\]+)*+/is';
+            $message = $this->replaceValues($jsonRegex, $message);
 
             // 2. Form/query-style: key=value (stopping at & or whitespace)
-            $formKey = ($leadingWildcard ? '' : '\b').$key;
-            $message = $this->replaceValues('/('.$formKey.'=)[^&\s]*/i', $message);
+            // After all JSON-style values, as a value may run past the end of a JSON string, into the next key.
+            $formRegex = '/((?:'.implode('|', $formKeys).')=)[^&\s]*/i';
+            $message = $this->replaceValues($formRegex, $message);
         }
 
         // 3. Password hashes, also in the values of other keys: $2y$10$… => $2y$[redacted]

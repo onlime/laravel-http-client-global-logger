@@ -76,6 +76,11 @@ it('obfuscates body keys by case-insensitive wildcard patterns', function (strin
         '{"url":"https://example.com/?sig=s1&page=2"}',
         '{"url":"https://example.com/?sig=[redacted]&page=2"}',
     ],
+    // A form-style value runs past the end of the JSON string, but the next key's value is replaced before
+    'json url before another key' => [
+        '{"url":"https://example.com/?token=s1","api_key":"s2 s3"}',
+        '{"url":"https://example.com/?token=[redacted]',
+    ],
     'form' => [
         'Password=s1&api_key=s2&X-Amz-Signature=s3&name=Alice',
         'Password=[redacted]&api_key=[redacted]&X-Amz-Signature=[redacted]&name=Alice',
@@ -132,6 +137,25 @@ it('stays within PCRE limits on long values', function (string $body, string $ex
     'json' => ['{"data":"'.str_repeat('a-b_c.d', 30_000).'","password":"s1"}', ',"password":"[redacted]"}'],
 ]);
 
+it('stays fast on long bodies without PCRE\'s JIT', function (string $body) {
+    $jit = ini_set('pcre.jit', '0');
+
+    try {
+        $start = hrtime(true);
+        $message = formatRequest(new Request('POST', 'https://example.com', [], $body));
+        $seconds = (hrtime(true) - $start) / 1e9;
+    } finally {
+        ini_set('pcre.jit', (string) $jit);
+    }
+
+    // Takes several seconds if each match scans the rest of the body
+    expect($message)->toContain('[redacted]')
+        ->and($seconds)->toBeLessThan(1.0);
+})->with([
+    // 3 MB without an uppercase letter, and 100K matches of a key that would be searched in both cases
+    'many matches' => [str_repeat('see https://example.com/?sig=abc ', 100_000)],
+]);
+
 it('leaves out a body it cannot obfuscate', function () {
     // A value with so many escaped characters that matching it exceeds the (lowered) backtrack limit
     $body = '{"password":"'.str_repeat('a\"', 50_000).'s1","name":"Alice"}';
@@ -168,6 +192,17 @@ it('ignores whitespace around configured patterns', function () {
     expect(formatRequest(new Request('POST', 'https://example.com/?token=s1', ['Cookie' => 's2'], 'name=Alice')))
         ->toBe("https://example.com/?token=[redacted]\r\nPOST /?token=[redacted] HTTP/1.1\r\nHost: example.com\r\nCookie: [redacted]\r\nname=Alice");
 });
+
+it('does not obfuscate body keys if none are configured', function (mixed $bodyKeys) {
+    config(['http-client-global-logger.obfuscate.body_keys' => $bodyKeys]);
+
+    expect(formatRequest(new Request('POST', 'https://example.com/?page=2', [], '{"name":"Alice"}&city=Bern')))
+        ->toBe("https://example.com/?page=2\r\nPOST /?page=2 HTTP/1.1\r\nHost: example.com\r\n{\"name\":\"Alice\"}&city=Bern");
+})->with([
+    'empty' => [[]],
+    'empty env variable' => [['']],
+    'null' => [null],
+]);
 
 it('inserts the replacement literally', function () {
     config(['http-client-global-logger.obfuscate.replacement' => '0$1\\1']);
