@@ -116,7 +116,7 @@ return [
         'replacement' => env('HTTP_CLIENT_GLOBAL_LOGGER_OBFUSCATE_REPLACEMENT', '[redacted]'),
         'headers' => explode(',', (string) env(
             'HTTP_CLIENT_GLOBAL_LOGGER_OBFUSCATE_HEADERS',
-            '*authorization,*cookie,*token*,*key,*secret*'
+            '*authorization,*cookie,*password*,*token*,*key,*secret*'
         )),
         'body_keys' => explode(',', (string) env(
             'HTTP_CLIENT_GLOBAL_LOGGER_OBFUSCATE_BODY_KEYS',

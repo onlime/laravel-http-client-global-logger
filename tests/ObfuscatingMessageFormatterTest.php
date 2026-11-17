@@ -18,6 +18,7 @@ it('obfuscates request and response headers by case-insensitive wildcard pattern
         'Cookie' => 'session=s3cr3t-3',
         'PRIVATE-TOKEN' => 's3cr3t-4',
         'X-MiteApiKey' => 's3cr3t-5',
+        'X-Api-Password' => 's3cr3t-7',
         'Accept' => 'application/json',
     ]);
     $response = new Response(200, ['Set-Cookie' => 'session=s3cr3t-6; HttpOnly', 'Content-Type' => 'application/json']);
@@ -25,8 +26,13 @@ it('obfuscates request and response headers by case-insensitive wildcard pattern
     $message = (new ObfuscatingMessageFormatter("{req_headers}\r\n{res_headers}"))->format($request, $response);
 
     expect($message)->not->toContain('s3cr3t')
-        ->and(substr_count($message, '[redacted]'))->toBe(6)
+        ->and(substr_count($message, '[redacted]'))->toBe(7)
         ->and($message)->toContain('Accept: application/json', 'Content-Type: application/json');
+});
+
+it('obfuscates body keys in the values of other headers', function () {
+    expect(formatRequest(new Request('GET', 'https://example.com', ['X-Debug' => 'token=s1 mode=full'])))
+        ->toContain("\r\nX-Debug: token=[redacted] mode=full\r\n");
 });
 
 it('obfuscates body keys by case-insensitive wildcard patterns', function (string $body, string $expected) {

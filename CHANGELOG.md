@@ -4,7 +4,7 @@
 
 - [Security] Obfuscation of more credentials by default, see the new [Sensitive data](README.md#sensitive-data) section in the README:
   - Header and body key patterns are case-insensitive now, and support wildcards using `*`, e.g. `*token*`.
-  - New `HTTP_CLIENT_GLOBAL_LOGGER_OBFUSCATE_HEADERS` default `*authorization,*cookie,*token*,*key,*secret*` (was `Authorization`), e.g. `Proxy-Authorization`, `Cookie`, `PRIVATE-TOKEN` or `X-Api-Key`.
+  - New `HTTP_CLIENT_GLOBAL_LOGGER_OBFUSCATE_HEADERS` default `*authorization,*cookie,*password*,*token*,*key,*secret*` (was `Authorization`), e.g. `Proxy-Authorization`, `Cookie`, `X-Api-Password`, `PRIVATE-TOKEN` or `X-Api-Key`.
   - New `HTTP_CLIENT_GLOBAL_LOGGER_OBFUSCATE_BODY_KEYS` default `pass,*password*,*token*,*secret*,*key,*signature*,sig` (was `pass,password,token,apikey,access_token,access_key,refresh_token,id_token,client_secret`), e.g. `accessToken`, `api_key`, `key`, `private_key`, `password_confirmation` or `X-Amz-Signature`.
   - Response headers are obfuscated too, e.g. `Set-Cookie`.
   - The password in the URL is obfuscated, e.g. `https://user:[redacted]@example.com`.
