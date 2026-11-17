@@ -11,6 +11,8 @@ use Illuminate\Support\Facades\Log;
 use Monolog\Handler\TestHandler;
 use Monolog\LogRecord;
 use Onlime\LaravelHttpClientGlobalLogger\Mixins\PendingRequestMixin;
+use Psr\Http\Message\RequestInterface;
+use Psr\Http\Message\ResponseInterface;
 use Psr\Log\LoggerInterface;
 
 it('logs the obfuscated request and response with Http::log()', function () {
@@ -37,6 +39,35 @@ it('logs the obfuscated request and response with Http::log()', function () {
         ->and($messages[0])->toStartWith('REQUEST: POST https://example.com/?token=[redacted]')
         ->and($messages[1])->toStartWith('RESPONSE: HTTP/1.1 200 OK')
         ->and(implode("\n", $messages))->not->toContain('s3cr3t');
+});
+
+it('logs the request and response with the changes of global middleware with Http::log()', function () {
+    PendingRequest::mixin(new PendingRequestMixin);
+
+    Event::forget(RequestSending::class);
+    Event::forget(ResponseReceived::class);
+
+    config(['http-client-global-logger.format' => [
+        'request' => 'REQUEST: {req_header_x-added}',
+        'response' => 'RESPONSE: {res_header_x-internal}|{res_header_x-added}',
+    ]]);
+
+    $messages = [];
+    $logger = Mockery::mock(LoggerInterface::class);
+    $logger->shouldReceive('log')->andReturnUsing(function (string $level, string $message) use (&$messages) {
+        $messages[] = $message;
+    });
+    Log::shouldReceive('channel')->with('http-client')->andReturn($logger);
+
+    // E.g. a response middleware stripping an internal header, which then isn't logged either, like in v1.5.0
+    Http::globalRequestMiddleware(fn (RequestInterface $request) => $request->withHeader('X-Added', 'request'));
+    Http::globalResponseMiddleware(fn (ResponseInterface $response) => $response
+        ->withoutHeader('X-Internal')
+        ->withHeader('X-Added', 'response'));
+
+    Http::fake(['*' => Http::response('', 200, ['X-Internal' => 'internal'])])->log()->get('https://example.com');
+
+    expect($messages)->toBe(['REQUEST: request', 'RESPONSE: |response']);
 });
 
 it('logs only once when Http::log() is called again', function () {
