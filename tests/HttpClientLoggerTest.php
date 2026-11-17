@@ -2,13 +2,24 @@
 
 declare(strict_types=1);
 
+use GuzzleHttp\Psr7\Response as Psr7Response;
 use Illuminate\Support\Facades\Exceptions;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Mockery\MockInterface;
 use Onlime\LaravelHttpClientGlobalLogger\HttpClientLogger;
+use Onlime\LaravelHttpClientGlobalLogger\Listeners\LogRequestSending;
+use Onlime\LaravelHttpClientGlobalLogger\Listeners\LogResponseReceived;
 use Psr\Http\Message\RequestInterface;
 use Psr\Log\LoggerInterface;
+use Saloon\Enums\Method;
+use Saloon\Http\Auth\QueryAuthenticator;
+use Saloon\Http\Connector;
+use Saloon\Http\PendingRequest as SaloonPendingRequest;
+use Saloon\Http\Request as SaloonRequest;
+use Saloon\Http\Response as SaloonResponse;
+use Saloon\Laravel\Events\SendingSaloonRequest;
+use Saloon\Laravel\Events\SentSaloonRequest;
 
 function setupLogger(): MockInterface
 {
@@ -317,4 +328,99 @@ it('reports a logging failure without breaking the request', function () {
 
     expect($response->ok())->toBeTrue();
     Exceptions::assertReported(UnexpectedValueException::class);
+});
+
+/**
+ * Capture the messages logged to the http-client channel.
+ *
+ * @return ArrayObject<int, string>
+ */
+function captureLog(): ArrayObject
+{
+    $messages = new ArrayObject;
+    $logger = Mockery::mock(LoggerInterface::class);
+    $logger->shouldReceive('info')->andReturnUsing(function (string $message) use ($messages) {
+        $messages[] = $message;
+    });
+    Log::shouldReceive('channel')->with('http-client')->andReturn($logger);
+    Log::shouldReceive('error')->andReturnUsing(fn (string $message, array $context) => throw $context['exception']);
+
+    return $messages;
+}
+
+it('logs the obfuscated request and response with the event listeners', function () {
+    $messages = captureLog();
+
+    Http::fake(['*' => Http::response('{"access_token":"s3cr3t-1"}', 200, ['Set-Cookie' => 'session=s3cr3t-2'])])
+        ->withToken('s3cr3t-3')
+        ->post('https://example.com/?token=s3cr3t-4', ['password' => 's3cr3t-5']);
+
+    expect($messages)->toHaveCount(2)
+        ->and($messages[0])->toStartWith('REQUEST: POST https://example.com/?token=[redacted]')
+        ->and($messages[0])->toContain('Authorization: [redacted]')
+        ->and($messages[1])->toStartWith('RESPONSE: HTTP/1.1 200 OK')
+        ->and($messages[1])->toContain('Set-Cookie: [redacted]')
+        ->and(implode("\n", $messages->getArrayCopy()))->not->toContain('s3cr3t');
+});
+
+it('excludes URLs matching except patterns with the event listeners', function () {
+    config(['http-client-global-logger.except' => ['https://api.pirsch.io/*']]);
+    $messages = captureLog();
+
+    Http::fake()->get('https://api.pirsch.io/api/v1/hit');
+
+    expect($messages)->toHaveCount(0);
+});
+
+it('logs obfuscated Saloon requests and responses', function () {
+    $messages = captureLog();
+
+    $pendingRequest = new SaloonPendingRequest(
+        new class extends Connector
+        {
+            public function resolveBaseUrl(): string
+            {
+                return 'https://api.example.com';
+            }
+
+            protected function defaultAuth(): QueryAuthenticator
+            {
+                return new QueryAuthenticator('apiKey', 's3cr3t-1');
+            }
+
+            protected function defaultHeaders(): array
+            {
+                return ['X-Api-Key' => 's3cr3t-2'];
+            }
+        },
+        new class extends SaloonRequest
+        {
+            protected Method $method = Method::GET;
+
+            public function resolveEndpoint(): string
+            {
+                return '/users';
+            }
+        }
+    );
+    $psrResponse = new Psr7Response(200, ['Set-Cookie' => 'session=s3cr3t-3'], '{"password":"s3cr3t-4"}');
+
+    (new LogRequestSending)->handle(new SendingSaloonRequest($pendingRequest));
+    (new LogResponseReceived)->handle(new SentSaloonRequest(
+        $pendingRequest,
+        new SaloonResponse($psrResponse, $pendingRequest, $pendingRequest->createPsrRequest())
+    ));
+
+    expect($messages)->toHaveCount(2)
+        ->and($messages[0])->toStartWith('REQUEST: GET https://api.example.com/users?apiKey=[redacted]')
+        ->and($messages[1])->toContain('{"password":"[redacted]"}')
+        ->and(implode("\n", $messages->getArrayCopy()))->not->toContain('s3cr3t');
+});
+
+it('does not add the request middleware if disabled', function () {
+    config(['http-client-global-logger.enabled' => false]);
+
+    HttpClientLogger::addRequestMiddleware();
+
+    expect(HttpClientLogger::requestMiddlewareWasAdded())->toBeFalse();
 });

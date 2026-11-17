@@ -8,6 +8,8 @@ use Illuminate\Http\Client\PendingRequest;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use Monolog\Handler\TestHandler;
+use Monolog\LogRecord;
 use Onlime\LaravelHttpClientGlobalLogger\Mixins\PendingRequestMixin;
 use Psr\Log\LoggerInterface;
 
@@ -49,4 +51,33 @@ it('logs only once when Http::log() is called again', function () {
 
     $client = Http::fake()->log();
     $client->log()->get('https://example.com');
+});
+
+it('logs with the given logger name with Http::log($name)', function () {
+    PendingRequest::mixin(new PendingRequestMixin);
+
+    Event::forget(RequestSending::class);
+    Event::forget(ResponseReceived::class);
+
+    config(['logging.channels.http-client' => ['driver' => 'monolog', 'handler' => TestHandler::class]]);
+    Log::forgetChannel('http-client');
+
+    Http::fake()->log('my-api')->get('https://example.com');
+
+    /** @var TestHandler $handler */
+    $handler = Log::channel('http-client')->getLogger()->getHandlers()[0];
+
+    expect(array_map(fn (LogRecord $record) => $record->channel, $handler->getRecords()))->toBe(['my-api', 'my-api']);
+});
+
+it('does not log with Http::log() if disabled', function () {
+    PendingRequest::mixin(new PendingRequestMixin);
+
+    Event::forget(RequestSending::class);
+    Event::forget(ResponseReceived::class);
+
+    config(['http-client-global-logger.enabled' => false]);
+    Log::shouldReceive('channel')->never();
+
+    expect(Http::fake()->log()->get('https://example.com')->ok())->toBeTrue();
 });
