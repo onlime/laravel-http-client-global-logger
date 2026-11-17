@@ -39,7 +39,10 @@ class ObfuscatingMessageFormatter implements MessageFormatterInterface
 
     private string $replacement;
 
-    public function __construct(private string $template) {}
+    /**
+     * @param  string|null  $template  Guzzle's MessageFormatter template, its default (Apache's Common Log Format) if null
+     */
+    public function __construct(private ?string $template) {}
 
     public function format(RequestInterface $request, ?ResponseInterface $response = null, ?Throwable $error = null): string
     {

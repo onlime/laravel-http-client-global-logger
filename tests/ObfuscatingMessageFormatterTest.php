@@ -182,3 +182,9 @@ it('does not obfuscate if disabled', function () {
     expect(formatRequest(new Request('POST', 'https://user:s1@example.com/?token=s2', ['Authorization' => 's3'], '{"password":"s4"}')))
         ->toBe("https://user:s1@example.com/?token=s2\r\nPOST /?token=s2 HTTP/1.1\r\nHost: example.com\r\nAuthorization: s3\r\n{\"password\":\"s4\"}");
 });
+
+it('formats with Guzzle\'s default template if none is given', function () {
+    // E.g. with HTTP_CLIENT_GLOBAL_LOGGER_REQUEST_FORMAT=null, like in v1.5.0
+    expect((new ObfuscatingMessageFormatter(null))->format(new Request('GET', 'https://example.com/?token=s1')))
+        ->toContain('"GET /?token=[redacted] HTTP/1.1"');
+});
