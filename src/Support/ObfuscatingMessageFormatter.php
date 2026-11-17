@@ -54,7 +54,7 @@ class ObfuscatingMessageFormatter implements MessageFormatterInterface
             $error
         );
 
-        return $this->obfuscateBody($this->obfuscateUrlPassword($request, $message));
+        return $this->obfuscateMessage($this->obfuscateUrlPassword($request, $message));
     }
 
     /**
@@ -93,10 +93,14 @@ class ObfuscatingMessageFormatter implements MessageFormatterInterface
     }
 
     /**
-     * Obfuscate the values of body keys, in JSON-style and form/query-style text,
-     * which also covers the query string of the URL, and password hashes anywhere.
+     * Obfuscate the values of body keys in JSON-style and form/query-style text, and password hashes.
+     *
+     * This is mainly about the body, but it runs on the whole formatted message, as it needs the URL and the header
+     * data as well: the query string of the URL, and values in headers not obfuscated by their name, e.g. a token in
+     * "X-Debug: token=…". Header values already replaced by obfuscateHeaders() stay as they are, as a replacement
+     * like [redacted] contains no key and value.
      */
-    private function obfuscateBody(string $message): string
+    private function obfuscateMessage(string $message): string
     {
         foreach ($this->patterns('body_keys') as $pattern) {
             $key = str_replace('\*', self::WILDCARD, preg_quote($pattern, '/'));
