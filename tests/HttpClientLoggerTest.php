@@ -29,12 +29,38 @@ function setupLogger(): MockInterface
     $logger = Mockery::mock(LoggerInterface::class);
 
     Log::shouldReceive('channel')->with('http-client')->andReturn($logger);
-
-    // Rethrow what the listeners report, e.g. a failed expectation, instead of logging it
-    Log::shouldReceive('error')->andReturnUsing(fn (string $message, array $context) => throw $context['exception']);
+    failOnReport();
 
     return $logger;
 }
+
+/**
+ * Fail the test if the listeners report anything, e.g. an exception thrown before logging, instead of logging it.
+ * It is rethrown after the test, as HttpClientLogger::rescue() ignores anything thrown while reporting.
+ */
+function failOnReport(): void
+{
+    Log::shouldReceive('error')->andReturnUsing(fn (string $message, array $context) => reported()->append($context['exception']));
+}
+
+/**
+ * @return ArrayObject<int, Throwable>
+ */
+function reported(): ArrayObject
+{
+    static $reported = new ArrayObject;
+
+    return $reported;
+}
+
+afterEach(function () {
+    $exception = reported()[0] ?? null;
+    reported()->exchangeArray([]);
+
+    if ($exception) {
+        throw $exception;
+    }
+});
 
 it('can add a global request middleware to log the requests', function () {
     Http::globalRequestMiddleware(
@@ -344,7 +370,7 @@ function captureLog(): ArrayObject
         $messages[] = $message;
     });
     Log::shouldReceive('channel')->with('http-client')->andReturn($logger);
-    Log::shouldReceive('error')->andReturnUsing(fn (string $message, array $context) => throw $context['exception']);
+    failOnReport();
 
     return $messages;
 }
