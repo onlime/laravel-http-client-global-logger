@@ -65,6 +65,11 @@ it('obfuscates body keys by case-insensitive wildcard patterns', function (strin
         'Password=s1&api_key=s2&X-Amz-Signature=s3&name=Alice',
         'Password=[redacted]&api_key=[redacted]&X-Amz-Signature=[redacted]&name=Alice',
     ],
+    // A value is matched up to & or whitespace, including quotes, like in v1.5.0
+    'quoted values' => [
+        '<Login user="alice" password="s1"/> password=s2"s3&name=Alice',
+        '<Login user="alice" password=[redacted] password=[redacted]&name=Alice',
+    ],
     'nested form' => [
         'user%5Bname%5D=Alice&user%5Bpassword%5D=s1&data[api_token]=s2',
         'user%5Bname%5D=Alice&user%5Bpassword%5D=[redacted]&data[api_token]=[redacted]',
@@ -82,7 +87,23 @@ it('keeps only the algorithm identifier of password hashes', function (string $b
         'hash=$P$B12345678901234567890123456789&name=Alice&password=%242y%2412%24R9hcIPz0gi',
         'hash=$P$[redacted]&name=Alice&password=[redacted]',
     ],
+    'xml' => [
+        '<hash>$2y$12$R9h/cIPz0gi.URNNX3kh2OPST9/PgBkqquzi.Ss7KIUgO2t0jWMUW</hash><name>Alice</name>',
+        '<hash>$2y$[redacted]</hash><name>Alice</name>',
+    ],
 ]);
+
+it('stays within PCRE limits on long values', function () {
+    // 200 KB of a URL-encoded value with many word boundaries, e.g. base64
+    $body = 'data='.str_repeat('a.b-c%2B', 25_000).'&password=s1';
+    $backtrackLimit = ini_set('pcre.backtrack_limit', '10000');
+
+    try {
+        expect(formatRequest(new Request('POST', 'https://example.com', [], $body)))->toEndWith('&password=[redacted]');
+    } finally {
+        ini_set('pcre.backtrack_limit', (string) $backtrackLimit);
+    }
+});
 
 it('obfuscates query params in the uri', function () {
     expect(formatRequest(new Request('GET', 'https://example.com/?key=s1&page=2&X-Amz-Security-Token=s2')))

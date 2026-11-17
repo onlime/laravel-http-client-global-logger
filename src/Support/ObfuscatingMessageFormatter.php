@@ -29,10 +29,10 @@ class ObfuscatingMessageFormatter implements MessageFormatterInterface
     /**
      * A password hash in the modular crypt format, $<identifier>$…, e.g. $2y$ (bcrypt), $argon2id$, or legacy ones like
      * $1$ (MD5-crypt), $6$ (SHA-512-crypt) or $P$ (phpass), with at least 16 more characters up to the end of a JSON
-     * string or form value, unlike short or spaced values like $5$ or $x$ + $y$. Its identifier is the first group.
-     * Like in onlime/laravel-sql-reporter, only its identifier is kept, e.g. $2y$[redacted].
+     * string, form value or XML element, unlike short or spaced values like $5$ or $x$ + $y$. Its identifier is the
+     * first group. Like in onlime/laravel-sql-reporter, only its identifier is kept, e.g. $2y$[redacted].
      */
-    private const string HASH = '(\$[\w-]+\$)[^\s"&]{16,}';
+    private const string HASH = '(\$[\w-]+\$)[^\s"\'&<]{16,}';
 
     private string $replacement;
 
@@ -107,8 +107,11 @@ class ObfuscatingMessageFormatter implements MessageFormatterInterface
             // The possessive *+ (no backtracking) keeps values with many escaped characters within PCRE's limits.
             $message = $this->replaceValues('/("'.$key.'"\s*:\s*")(\\\\.|[^"\\\\]+)*+/i', $message);
 
-            // 2. Form/query-style: key=value (stopping at &, whitespace or a quote)
-            $message = $this->replaceValues('/(\b'.$key.'=)[^&\s"]*/i', $message);
+            // 2. Form/query-style: key=value (stopping at & or whitespace)
+            // A leading wildcard is left out, so that the match may start anywhere in a key, e.g. at 'Signature'
+            // in 'X-Amz-Signature='. Matching it would get slow on long values.
+            $formKey = str_starts_with($pattern, '*') ? Str::after($key, self::WILDCARD) : '\b'.$key;
+            $message = $this->replaceValues('/('.$formKey.'=)[^&\s]*/i', $message);
         }
 
         // 3. Password hashes, also in the values of other keys: $2y$10$… => $2y$[redacted]
