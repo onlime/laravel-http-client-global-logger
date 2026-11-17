@@ -57,8 +57,9 @@ class HttpClientLogger
 
     /**
      * Run a logging callback without ever breaking the HTTP request, like Laravel's rescue(): any failure is
-     * reported instead. HTTP requests made while reporting it (e.g. by an error tracker) are not logged,
-     * as their logging would fail and be reported again, endlessly.
+     * reported instead, and a failure of the reporting itself (e.g. an unwritable log directory) is ignored.
+     * HTTP requests made while reporting it (e.g. by an error tracker) are not logged, as their logging
+     * would fail and be reported again, endlessly.
      */
     public static function rescue(Closure $callback): void
     {
@@ -71,6 +72,8 @@ class HttpClientLogger
 
             try {
                 report($e);
+            } catch (Throwable) {
+                // Nothing is left to report the failure with
             } finally {
                 self::$reportingFailure = false;
             }

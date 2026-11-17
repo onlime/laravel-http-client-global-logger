@@ -447,3 +447,12 @@ it('does not log the requests made while reporting a logging failure', function 
     expect($response->ok())->toBeTrue()
         ->and($reported)->toBe(2);
 });
+
+it('does not break the request if reporting a logging failure fails too', function () {
+    // An unwritable log file, and a reporting that fails too, e.g. with an unwritable log directory
+    config(['logging.channels.http-client.with.stream' => '/dev/null/http-client.log']);
+    Log::forgetChannel('http-client');
+    app(ExceptionHandler::class)->reportable(fn (UnexpectedValueException $e) => throw new RuntimeException('Reporting failed'));
+
+    expect(Http::fake()->get('https://example.com')->ok())->toBeTrue();
+});
