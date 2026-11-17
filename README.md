@@ -181,7 +181,7 @@ Both packages provide a different feature set and have those advantages:
   - global logging
   - auto-configured log channel `http-client` to log to a separate `http-client.log` file
   - Full support of [Guzzle MessageFormatter](https://github.com/guzzle/guzzle/blob/master/src/MessageFormatter.php) variable substitutions for highly customized log messages.
-  - basic obfuscation of credentials in HTTP Client requests
+  - obfuscation of credentials in HTTP Client requests and responses
   - trimming of response body content
 - [bilfeldt/laravel-http-client-logger](https://github.com/bilfeldt/laravel-http-client-logger)
   - conditional logging using `logWhen($condition)`
@@ -212,6 +212,7 @@ Not obfuscated:
 - Keys and headers with other names. Add them to the patterns above.
 - Other body formats, e.g. XML or `multipart/form-data`. Exclude such URLs from logging with `HTTP_CLIENT_GLOBAL_LOGGER_EXCEPT`.
 - JSON values other than strings, e.g. `{"pin":1234}` or `{"tokens":["…"]}`, and JSON within a JSON string, e.g. `{"payload":"{\"password\":\"…\"}"}`.
+- Nested or array keys in form bodies for patterns without a trailing `*`, e.g. `credentials[api_key]=…` for `*key`, or `sig[]=…` for `sig`.
 - Secrets in the path of the URL, or a token as its user name without password, e.g. `https://TOKEN@example.com`.
 - URL-encoded password hashes (`%242y%24…`) in the values of other keys.
 
