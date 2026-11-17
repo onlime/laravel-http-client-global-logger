@@ -6,6 +6,7 @@ namespace Onlime\LaravelHttpClientGlobalLogger\Support;
 
 use GuzzleHttp\MessageFormatter;
 use GuzzleHttp\MessageFormatterInterface;
+use GuzzleHttp\Psr7\Utils;
 use Illuminate\Support\Str;
 use Psr\Http\Message\MessageInterface;
 use Psr\Http\Message\RequestInterface;
@@ -21,7 +22,7 @@ use Throwable;
 class ObfuscatingMessageFormatter implements MessageFormatterInterface
 {
     /**
-     * Characters of a key that a '*' wildcard matches, e.g. 'user%5B' and '%5D'
+     * Characters of a key that a '*' wildcard within or at the end of a body key pattern matches, e.g. '%5D'
      * in 'user%5Bpassword%5D' (user[password]) for the pattern '*password*'.
      */
     private const string WILDCARD = '[\w.%\[\]-]*';
@@ -40,15 +41,25 @@ class ObfuscatingMessageFormatter implements MessageFormatterInterface
 
     public function format(RequestInterface $request, ?ResponseInterface $response = null, ?Throwable $error = null): string
     {
-        $formatter = new MessageFormatter($this->template);
-
         if (! config('http-client-global-logger.obfuscate.enabled')) {
-            return $formatter->format($request, $response, $error);
+            return (new MessageFormatter($this->template))->format($request, $response, $error);
         }
 
         $this->replacement = (string) config('http-client-global-logger.obfuscate.replacement');
 
-        $message = $formatter->format(
+        try {
+            return $this->formatObfuscated($request, $response, $error);
+        } catch (RuntimeException $e) {
+            // Never log a body that can't be obfuscated, e.g. a huge value exceeding PCRE's limits, but leave it out
+            $body = Utils::streamFor('[body not logged: '.$e->getMessage().']');
+
+            return $this->formatObfuscated($request->withBody($body), $response?->withBody($body), $error);
+        }
+    }
+
+    private function formatObfuscated(RequestInterface $request, ?ResponseInterface $response, ?Throwable $error): string
+    {
+        $message = (new MessageFormatter($this->template))->format(
             $this->obfuscateHeaders($request),
             $response ? $this->obfuscateHeaders($response) : null,
             $error
@@ -103,18 +114,22 @@ class ObfuscatingMessageFormatter implements MessageFormatterInterface
     private function obfuscateMessage(string $message): string
     {
         foreach ($this->patterns('body_keys') as $pattern) {
-            $key = str_replace('\*', self::WILDCARD, preg_quote($pattern, '/'));
+            // A leading wildcard is left out, so that the match may start anywhere in a key, e.g. at 'Signature' in
+            // 'X-Amz-Signature='. Matching it would get slow on long values. Without one, the key starts at a quote
+            // (JSON-style) or at a word boundary (form/query-style).
+            $leadingWildcard = str_starts_with($pattern, '*');
+            $key = str_replace('\*', self::WILDCARD, preg_quote(ltrim($pattern, '*'), '/'));
 
             // 1. JSON-style: "key":"value"
             // The value is matched up to its closing quote, skipping escaped characters like \" or \\.
             // A value without closing quote (cut off by trimming the response body) is matched up to the end.
-            // The possessive *+ (no backtracking) keeps values with many escaped characters within PCRE's limits.
-            $message = $this->replaceValues('/("'.$key.'"\s*:\s*")(\\\\.|[^"\\\\]+)*+/i', $message);
+            // The possessive *+ (no backtracking) keeps values with many escaped characters within PCRE's limits,
+            // up to hundreds of thousands of them without PCRE's JIT. Beyond, format() leaves out the body.
+            $jsonKey = ($leadingWildcard ? '' : '"').$key;
+            $message = $this->replaceValues('/('.$jsonKey.'"\s*:\s*")(\\\\.|[^"\\\\]+)*+/is', $message);
 
             // 2. Form/query-style: key=value (stopping at & or whitespace)
-            // A leading wildcard is left out, so that the match may start anywhere in a key, e.g. at 'Signature'
-            // in 'X-Amz-Signature='. Matching it would get slow on long values.
-            $formKey = str_starts_with($pattern, '*') ? Str::after($key, self::WILDCARD) : '\b'.$key;
+            $formKey = ($leadingWildcard ? '' : '\b').$key;
             $message = $this->replaceValues('/('.$formKey.'=)[^&\s]*/i', $message);
         }
 

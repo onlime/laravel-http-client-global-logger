@@ -59,6 +59,15 @@ it('obfuscates body keys by case-insensitive wildcard patterns', function (strin
         '{"password":"s1\"s2\\\\","pass":"\\\\\"s3","name":"Alice \"A\""}',
         '{"password":"[redacted]","pass":"[redacted]","name":"Alice \"A\""}',
     ],
+    // A leading wildcard matches anything, as the match may start anywhere in a key
+    'json leading wildcard' => [
+        '{"api key":"s1","user:password":"s2","name":"Alice"}',
+        '{"api key":"[redacted]","user:password":"[redacted]","name":"Alice"}',
+    ],
+    'json-style backslash and line break' => [
+        "{\"password\":\"s1\\\ns2\",\"name\":\"Alice\"}",
+        '{"password":"[redacted]","name":"Alice"}',
+    ],
     'json cut off by trimming' => [
         '{"name":"Alice","access_token":"s1s2s3...',
         '{"name":"Alice","access_token":"[redacted]',
@@ -99,16 +108,35 @@ it('keeps only the algorithm identifier of password hashes', function (string $b
     ],
 ]);
 
-it('stays within PCRE limits on long values', function () {
-    // 200 KB of a URL-encoded value with many word boundaries, e.g. base64
-    $body = 'data='.str_repeat('a.b-c%2B', 25_000).'&password=s1';
+it('stays within PCRE limits on long values', function (string $body, string $expected) {
     $backtrackLimit = ini_set('pcre.backtrack_limit', '10000');
 
     try {
-        expect(formatRequest(new Request('POST', 'https://example.com', [], $body)))->toEndWith('&password=[redacted]');
+        expect(formatRequest(new Request('POST', 'https://example.com', [], $body)))->toEndWith($expected);
     } finally {
         ini_set('pcre.backtrack_limit', (string) $backtrackLimit);
     }
+})->with([
+    // 200 KB of a value with many word boundaries, e.g. URL-encoded base64, or a long run of key characters
+    'form' => ['data='.str_repeat('a.b-c%2B', 25_000).'&password=s1', '&password=[redacted]'],
+    'json' => ['{"data":"'.str_repeat('a-b_c.d', 30_000).'","password":"s1"}', ',"password":"[redacted]"}'],
+]);
+
+it('leaves out a body it cannot obfuscate', function () {
+    // A value with so many escaped characters that matching it exceeds the (lowered) backtrack limit
+    $body = '{"password":"'.str_repeat('a\"', 50_000).'s1","name":"Alice"}';
+    $backtrackLimit = ini_set('pcre.backtrack_limit', '1000');
+
+    try {
+        $message = formatRequest(new Request('POST', 'https://example.com/?token=s2', [], $body));
+    } finally {
+        ini_set('pcre.backtrack_limit', (string) $backtrackLimit);
+    }
+
+    expect($message)->toStartWith("https://example.com/?token=[redacted]\r\n")
+        ->and($message)->toEndWith("\r\n[body not logged: Body obfuscation failed: Backtrack limit exhausted]")
+        ->and($message)->not->toContain('s1')
+        ->and($message)->not->toContain('s2');
 });
 
 it('obfuscates query params in the uri', function () {
