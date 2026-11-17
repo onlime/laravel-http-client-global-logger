@@ -32,7 +32,7 @@ class LogRequestSending
      */
     public function handleEvent(RequestSending|SendingSaloonRequest $event): void
     {
-        rescue(function () use ($event) {
+        HttpClientLogger::rescue(function () use ($event) {
             $psrRequest = EventHelper::getPsrRequest($event);
 
             if (! UrlFilter::shouldLog($psrRequest)) {

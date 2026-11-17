@@ -4,12 +4,14 @@ declare(strict_types=1);
 
 namespace Onlime\LaravelHttpClientGlobalLogger;
 
+use Closure;
 use Illuminate\Http\Client\Events\RequestSending;
 use Illuminate\Http\Client\Request;
 use Illuminate\Support\Facades\Http;
 use Onlime\LaravelHttpClientGlobalLogger\Listeners\LogRequestSending;
 use Onlime\LaravelHttpClientGlobalLogger\Support\UrlFilter;
 use Psr\Http\Message\RequestInterface;
+use Throwable;
 
 /**
  * Use HttpClientLogger::addRequestMiddleware() to manually add the middleware
@@ -18,6 +20,8 @@ use Psr\Http\Message\RequestInterface;
 class HttpClientLogger
 {
     private static bool $addedRequestMiddleware = false;
+
+    private static bool $reportingFailure = false;
 
     public static function addRequestMiddleware(): void
     {
@@ -49,5 +53,27 @@ class HttpClientLogger
     public static function requestMiddlewareWasAdded(): bool
     {
         return self::$addedRequestMiddleware;
+    }
+
+    /**
+     * Run a logging callback without ever breaking the HTTP request, like Laravel's rescue(): any failure is
+     * reported instead. HTTP requests made while reporting it (e.g. by an error tracker) are not logged,
+     * as their logging would fail and be reported again, endlessly.
+     */
+    public static function rescue(Closure $callback): void
+    {
+        if (self::$reportingFailure) {
+            return;
+        }
+
+        rescue($callback, function (Throwable $e) {
+            self::$reportingFailure = true;
+
+            try {
+                report($e);
+            } finally {
+                self::$reportingFailure = false;
+            }
+        }, report: false);
     }
 }

@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use GuzzleHttp\Psr7\Response as Psr7Response;
+use Illuminate\Contracts\Debug\ExceptionHandler;
 use Illuminate\Support\Facades\Exceptions;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
@@ -423,4 +424,26 @@ it('does not add the request middleware if disabled', function () {
     HttpClientLogger::addRequestMiddleware();
 
     expect(HttpClientLogger::requestMiddlewareWasAdded())->toBeFalse();
+});
+
+it('does not log the requests made while reporting a logging failure', function () {
+    // An unwritable log file, and an error tracker reporting the failure with an HTTP request
+    config(['logging.channels.http-client.with.stream' => '/dev/null/http-client.log']);
+    Log::forgetChannel('http-client');
+
+    $reported = 0;
+    app(ExceptionHandler::class)->reportable(function (UnexpectedValueException $e) use (&$reported) {
+        // Limited, so that an endless recursion fails the test instead of exhausting the memory
+        if (++$reported <= 10) {
+            Http::post('https://errors.example.com', ['message' => $e->getMessage()]);
+        }
+
+        return false;
+    });
+
+    $response = Http::fake()->get('https://example.com');
+
+    // Once for the request, once for the response, not for the error tracker's request
+    expect($response->ok())->toBeTrue()
+        ->and($reported)->toBe(2);
 });
