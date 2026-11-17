@@ -12,10 +12,10 @@
   - JSON values with escaped quotes (`\"`) are obfuscated entirely, and so are values cut off by trimming the response body.
   - Whitespace around the comma-separated patterns is ignored, e.g. `Authorization, Cookie`.
 - [Security] The mixin variant (`Http::log()`) obfuscates credentials like the global logging variants.
-- Fixed the mixin variant on Guzzle 8, where `Http::log()` threw an `InvalidArgumentException` (`The "handler" request option is not supported`) before sending the request. It also logs the request as sent now, with the changes of other middleware, and each redirect separately. Middleware added after `Http::log()` is no longer ignored.
-- A failure while logging (e.g. an unwritable log file) is reported, and no longer breaks the HTTP request.
+- Fixed the mixin variant on Guzzle 8, where `Http::log()` threw an `InvalidArgumentException` (`The "handler" request option is not supported`) before sending the request. It also logs the request with the changes of global request middleware and of middleware added before `Http::log()` now, and each redirect separately. Middleware added after `Http::log()` is no longer ignored.
+- A failure while logging (e.g. an unwritable log file) is reported, and no longer breaks the HTTP request, in the global logging variants. The mixin variant (`Http::log()`) still throws it, like before.
 - New `HTTP_CLIENT_GLOBAL_LOGGER_OBFUSCATE_REPLACEMENT` default `[redacted]` (was `**********`), like [onlime/laravel-sql-reporter](https://github.com/onlime/laravel-sql-reporter). It is inserted literally now, a replacement like `$1` or `0000` no longer breaks the log line.
-- Replaced the `ObfuscatesBody` trait and `LogRequestSending::obfuscateHeaders()` by the new `Support\ObfuscatingMessageFormatter`, used by all variants.
+- Breaking, if you used or extended them: removed the `ObfuscatesBody` trait and the protected `LogRequestSending::obfuscateHeaders()`, replaced by the new `Support\ObfuscatingMessageFormatter`, used by all variants.
 - README: new "Sensitive data" and "Upgrading" sections.
 
 ## [v1.5.0 (2026-11-14)](https://github.com/onlime/laravel-http-client-global-logger/compare/v1.4.0...v1.5.0)

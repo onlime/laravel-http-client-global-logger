@@ -109,7 +109,7 @@ return [
     | and form/query-style (key=value) keys in the URL and body, are replaced
     | if their name matches any of these patterns. Matching is case-insensitive
     | and supports wildcards using '*', see Illuminate\Support\Str::is().
-    | A password in the URL (https://user:password@example.com) is always replaced.
+    | A password in the URL (https://user:password@example.com) is replaced too.
     */
     'obfuscate' => [
         'enabled' => (bool) env('HTTP_CLIENT_GLOBAL_LOGGER_OBFUSCATE_ENABLED', true),

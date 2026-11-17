@@ -211,10 +211,11 @@ Not obfuscated:
 
 - Keys and headers with other names. Add them to the patterns above.
 - Other body formats, e.g. XML or `multipart/form-data`. Exclude such URLs from logging with `HTTP_CLIENT_GLOBAL_LOGGER_EXCEPT`.
-- Numeric JSON values, e.g. `{"pin":1234}`.
+- JSON values other than strings, e.g. `{"pin":1234}` or `{"tokens":["…"]}`, and JSON within a JSON string, e.g. `{"payload":"{\"password\":\"…\"}"}`.
+- Secrets in the path of the URL, or a token as its user name without password, e.g. `https://TOKEN@example.com`.
 - URL-encoded password hashes (`%242y%24…`) in the values of other keys.
 
-Protect the log file like any other log of your application: it is created with the same permissions as Laravel's own logs. If writing the log fails, the exception is reported and the HTTP request is sent as usual.
+Protect the log file like any other log of your application: it is created with the same permissions as Laravel's own logs. If logging fails, e.g. because the log file isn't writable, the exception is reported and the HTTP request is sent as usual. This applies to the global logging variants 1 and 3, while the mixin variant (`Http::log()`) throws the exception.
 
 ## Upgrading
 
