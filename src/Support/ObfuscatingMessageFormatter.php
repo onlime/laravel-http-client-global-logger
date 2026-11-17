@@ -23,9 +23,11 @@ class ObfuscatingMessageFormatter implements MessageFormatterInterface
 {
     /**
      * Characters of a key that a '*' wildcard within or at the end of a body key pattern matches, e.g. '%5D'
-     * in 'user%5Bpassword%5D' (user[password]) for the pattern '*password*'.
+     * in 'user%5Bpassword%5D' (user[password]) for the pattern '*password*'. Up to 100 of them, so that a long
+     * run of them, e.g. URL-encoded JSON with many tokens, is not scanned to its end at each match attempt,
+     * which gets slow without PCRE's JIT.
      */
-    private const string WILDCARD = '[\w.%\[\]-]*';
+    private const string WILDCARD = '[\w.%\[\]-]{0,100}';
 
     /**
      * A password hash in the modular crypt format, $<identifier>$…, of a known algorithm: $2y$ (bcrypt, also $2$, $2a$,

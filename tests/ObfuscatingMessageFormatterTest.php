@@ -154,6 +154,8 @@ it('stays fast on long bodies without PCRE\'s JIT', function (string $body) {
 })->with([
     // 3 MB without an uppercase letter, and 100K matches of a key that would be searched in both cases
     'many matches' => [str_repeat('see https://example.com/?sig=abc ', 100_000)],
+    // 1 MB of key characters with many occurrences of a key, e.g. URL-encoded JSON
+    'long key' => ['{"data":"'.str_repeat('Token-', 170_000).'","password":"s1"}'],
 ]);
 
 it('leaves out a body it cannot obfuscate', function () {

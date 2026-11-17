@@ -205,7 +205,7 @@ The log contains full requests and responses, including all headers and bodies. 
 - **The password in the URL**, e.g. `https://user:[redacted]@example.com`.
 - **Password hashes** of known algorithms in the modular crypt format (`$<identifier>$…`), anywhere except for their algorithm identifier, also in the values of the body keys above, like in [onlime/laravel-sql-reporter](https://github.com/onlime/laravel-sql-reporter). E.g. `$2y$[redacted]` (bcrypt), `$argon2id$[redacted]`, or legacy ones like `$6$[redacted]` (SHA-512-crypt) or `$P$[redacted]` (phpass). Other values like `$Summer-2024$…` aren't taken for a hash.
 
-Patterns are comma-separated and case-insensitive, and empty ones are ignored. They support wildcards using `*`, for headers like [`Str::is()`](https://laravel.com/docs/strings#method-str-is). For body keys, a leading `*` matches anything, as the match may then start anywhere in a key, e.g. `"api key"` for `*key`. A `*` within or at the end of a body key pattern matches the characters of a key: letters, digits, `_`, `.`, `-`, `%`, `[` and `]`, e.g. `user[password]` or `user%5Bpassword%5D` for `*password*`.
+Patterns are comma-separated and case-insensitive, and empty ones are ignored. They support wildcards using `*`, for headers like [`Str::is()`](https://laravel.com/docs/strings#method-str-is). For body keys, a leading `*` matches anything, as the match may then start anywhere in a key, e.g. `"api key"` for `*key`. A `*` within or at the end of a body key pattern matches up to 100 characters of a key: letters, digits, `_`, `.`, `-`, `%`, `[` and `]`, e.g. `user[password]` or `user%5Bpassword%5D` for `*password*`.
 
 Not obfuscated:
 
