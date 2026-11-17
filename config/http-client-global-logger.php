@@ -105,18 +105,22 @@ return [
     | Obfuscation of credentials in logs
     |--------------------------------------------------------------------------
     |
-    | Obfuscation only works if you have disabled 'mixin' above, which is the default.
+    | Values of request and response headers, and of JSON-style ("key":"value")
+    | and form/query-style (key=value) keys in the URL and body, are replaced
+    | if their name matches any of these patterns. Matching is case-insensitive
+    | and supports wildcards using '*', see the README's "Sensitive data" section.
+    | A password in the URL (https://user:password@example.com) is replaced too.
     */
     'obfuscate' => [
         'enabled' => (bool) env('HTTP_CLIENT_GLOBAL_LOGGER_OBFUSCATE_ENABLED', true),
-        'replacement' => env('HTTP_CLIENT_GLOBAL_LOGGER_OBFUSCATE_REPLACEMENT', '**********'),
+        'replacement' => env('HTTP_CLIENT_GLOBAL_LOGGER_OBFUSCATE_REPLACEMENT', '[redacted]'),
         'headers' => explode(',', (string) env(
             'HTTP_CLIENT_GLOBAL_LOGGER_OBFUSCATE_HEADERS',
-            'Authorization'
+            '*authorization,*cookie,*password*,*token*,*key,*secret*'
         )),
         'body_keys' => explode(',', (string) env(
             'HTTP_CLIENT_GLOBAL_LOGGER_OBFUSCATE_BODY_KEYS',
-            'pass,password,token,apikey,access_token,access_key,refresh_token,id_token,client_secret'
+            'pass,*password*,*token*,*secret*,*key,*signature*,sig'
         )),
     ],
 

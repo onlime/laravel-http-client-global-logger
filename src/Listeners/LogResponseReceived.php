@@ -4,48 +4,45 @@ declare(strict_types=1);
 
 namespace Onlime\LaravelHttpClientGlobalLogger\Listeners;
 
-use GuzzleHttp\MessageFormatter;
 use GuzzleHttp\Psr7\Utils;
 use Illuminate\Http\Client\Events\ResponseReceived;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Onlime\LaravelHttpClientGlobalLogger\EventHelper;
+use Onlime\LaravelHttpClientGlobalLogger\HttpClientLogger;
+use Onlime\LaravelHttpClientGlobalLogger\Support\ObfuscatingMessageFormatter;
 use Onlime\LaravelHttpClientGlobalLogger\Support\UrlFilter;
-use Onlime\LaravelHttpClientGlobalLogger\Traits\ObfuscatesBody;
 use Psr\Http\Message\ResponseInterface;
 use Saloon\Laravel\Events\SentSaloonRequest;
 
 class LogResponseReceived
 {
-    use ObfuscatesBody;
-
     /**
-     * Handle the event.
+     * Handle the event. Any failure is reported, never breaking the HTTP request.
      */
     public function handle(ResponseReceived|SentSaloonRequest $event): void
     {
-        $psrRequest = EventHelper::getPsrRequest($event);
+        HttpClientLogger::rescue(function () use ($event) {
+            $psrRequest = EventHelper::getPsrRequest($event);
 
-        if (! UrlFilter::shouldLog($psrRequest)) {
-            return;
-        }
+            if (! UrlFilter::shouldLog($psrRequest)) {
+                return;
+            }
 
-        $formatter = new MessageFormatter(config('http-client-global-logger.format.response'));
+            $formatter = new ObfuscatingMessageFormatter(config('http-client-global-logger.format.response'));
 
-        $message = $formatter->format(
-            $psrRequest,
-            $this->trimBody(
-                EventHelper::getPsrResponse($event),
-                $psrRequest->hasHeader('X-Global-Logger-Trim-Always')
-            )
-        );
+            // Trim the body first, so that the obfuscation only processes the trimmed body
+            $message = $formatter->format(
+                $psrRequest,
+                $this->trimBody(
+                    EventHelper::getPsrResponse($event),
+                    $psrRequest->hasHeader('X-Global-Logger-Trim-Always')
+                )
+            );
 
-        if (config('http-client-global-logger.obfuscate.enabled')) {
-            $message = $this->obfuscateBody($message);
-        }
-
-        Log::channel(config('http-client-global-logger.channel'))
-            ->info($message);
+            Log::channel(config('http-client-global-logger.channel'))
+                ->info($message);
+        });
     }
 
     /**

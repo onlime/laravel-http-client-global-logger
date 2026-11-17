@@ -2,23 +2,113 @@
 
 declare(strict_types=1);
 
-use GuzzleHttp\HandlerStack;
+use Illuminate\Http\Client\Events\RequestSending;
+use Illuminate\Http\Client\Events\ResponseReceived;
 use Illuminate\Http\Client\PendingRequest;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
+use Monolog\Handler\TestHandler;
+use Monolog\LogRecord;
 use Onlime\LaravelHttpClientGlobalLogger\Mixins\PendingRequestMixin;
+use Psr\Http\Message\RequestInterface;
+use Psr\Http\Message\ResponseInterface;
+use Psr\Log\LoggerInterface;
 
-it('rebuilds the guzzle handler stack to include the logger middleware at the bottom of the stack', function () {
+it('logs the obfuscated request and response with Http::log()', function () {
     PendingRequest::mixin(new PendingRequestMixin);
 
-    $pendingRequest = Http::withHeaders(['X-Test' => 'true'])->log();
+    // With the mixin variant enabled, the global logging listeners are not registered
+    Event::forget(RequestSending::class);
+    Event::forget(ResponseReceived::class);
 
-    /** @var HandlerStack $handler */
-    $handler = $pendingRequest->getOptions()['handler'];
+    $messages = [];
+    $logger = Mockery::mock(LoggerInterface::class);
+    $logger->shouldReceive('log')->twice()->with('info', Mockery::type('string'))
+        ->andReturnUsing(function (string $level, string $message) use (&$messages) {
+            $messages[] = $message;
+        });
+    Log::shouldReceive('channel')->with('http-client')->andReturn($logger);
 
-    // We need to invade the HandlerStack to access the stack property or findByName method
-    expect($handler)->toBeInstanceOf(HandlerStack::class)
-        ->and(invade($handler)->findByName('http-client-global-logger-request'))->toBeInt()
-        ->and(invade($handler)->findByName('http-client-global-logger-response'))->toBeInt()
-        ->and(fn () => invade($handler)->findByName('http-client-global-logger-0'))
-        ->toThrow(InvalidArgumentException::class);
+    Http::fake(['*' => Http::response('{"access_token":"s3cr3t-1"}', 200, ['Set-Cookie' => 'session=s3cr3t-2'])])
+        ->log()
+        ->withToken('s3cr3t-3')
+        ->post('https://example.com/?token=s3cr3t-4', ['password' => 's3cr3t-5']);
+
+    expect($messages)->toHaveCount(2)
+        ->and($messages[0])->toStartWith('REQUEST: POST https://example.com/?token=[redacted]')
+        ->and($messages[1])->toStartWith('RESPONSE: HTTP/1.1 200 OK')
+        ->and(implode("\n", $messages))->not->toContain('s3cr3t');
+});
+
+it('logs the request and response with the changes of global middleware with Http::log()', function () {
+    PendingRequest::mixin(new PendingRequestMixin);
+
+    Event::forget(RequestSending::class);
+    Event::forget(ResponseReceived::class);
+
+    config(['http-client-global-logger.format' => [
+        'request' => 'REQUEST: {req_header_x-added}',
+        'response' => 'RESPONSE: {res_header_x-internal}|{res_header_x-added}',
+    ]]);
+
+    $messages = [];
+    $logger = Mockery::mock(LoggerInterface::class);
+    $logger->shouldReceive('log')->andReturnUsing(function (string $level, string $message) use (&$messages) {
+        $messages[] = $message;
+    });
+    Log::shouldReceive('channel')->with('http-client')->andReturn($logger);
+
+    // E.g. a response middleware stripping an internal header, which then isn't logged either, like in v1.5.0
+    Http::globalRequestMiddleware(fn (RequestInterface $request) => $request->withHeader('X-Added', 'request'));
+    Http::globalResponseMiddleware(fn (ResponseInterface $response) => $response
+        ->withoutHeader('X-Internal')
+        ->withHeader('X-Added', 'response'));
+
+    Http::fake(['*' => Http::response('', 200, ['X-Internal' => 'internal'])])->log()->get('https://example.com');
+
+    expect($messages)->toBe(['REQUEST: request', 'RESPONSE: |response']);
+});
+
+it('logs only once when Http::log() is called again', function () {
+    PendingRequest::mixin(new PendingRequestMixin);
+
+    Event::forget(RequestSending::class);
+    Event::forget(ResponseReceived::class);
+
+    $logger = Mockery::mock(LoggerInterface::class);
+    $logger->shouldReceive('log')->twice()->with('info', Mockery::type('string'));
+    Log::shouldReceive('channel')->with('http-client')->andReturn($logger);
+
+    $client = Http::fake()->log();
+    $client->log()->get('https://example.com');
+});
+
+it('logs with the given logger name with Http::log($name)', function () {
+    PendingRequest::mixin(new PendingRequestMixin);
+
+    Event::forget(RequestSending::class);
+    Event::forget(ResponseReceived::class);
+
+    config(['logging.channels.http-client' => ['driver' => 'monolog', 'handler' => TestHandler::class]]);
+    Log::forgetChannel('http-client');
+
+    Http::fake()->log('my-api')->get('https://example.com');
+
+    /** @var TestHandler $handler */
+    $handler = Log::channel('http-client')->getLogger()->getHandlers()[0];
+
+    expect(array_map(fn (LogRecord $record) => $record->channel, $handler->getRecords()))->toBe(['my-api', 'my-api']);
+});
+
+it('does not log with Http::log() if disabled', function () {
+    PendingRequest::mixin(new PendingRequestMixin);
+
+    Event::forget(RequestSending::class);
+    Event::forget(ResponseReceived::class);
+
+    config(['http-client-global-logger.enabled' => false]);
+    Log::shouldReceive('channel')->never();
+
+    expect(Http::fake()->log()->get('https://example.com')->ok())->toBeTrue();
 });
