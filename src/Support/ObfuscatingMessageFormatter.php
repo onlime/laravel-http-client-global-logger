@@ -174,9 +174,12 @@ class ObfuscatingMessageFormatter implements MessageFormatterInterface
      */
     private function patterns(string $option): array
     {
+        $patterns = config("http-client-global-logger.obfuscate.$option");
+
         $patterns = array_map(
             fn (mixed $pattern) => trim((string) $pattern),
-            (array) config("http-client-global-logger.obfuscate.$option", [])
+            // Also comma-separated like the env variable, e.g. in a published config file without explode()
+            is_string($patterns) ? explode(',', $patterns) : (array) $patterns
         );
 
         return array_values(array_filter($patterns));

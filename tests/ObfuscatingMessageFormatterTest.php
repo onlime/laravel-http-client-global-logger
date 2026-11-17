@@ -195,6 +195,17 @@ it('ignores whitespace around configured patterns', function () {
         ->toBe("https://example.com/?token=[redacted]\r\nPOST /?token=[redacted] HTTP/1.1\r\nHost: example.com\r\nCookie: [redacted]\r\nname=Alice");
 });
 
+it('accepts comma-separated patterns', function () {
+    // E.g. in a published config file without explode()
+    config([
+        'http-client-global-logger.obfuscate.headers' => 'Authorization, Cookie',
+        'http-client-global-logger.obfuscate.body_keys' => 'password,token',
+    ]);
+
+    expect(formatRequest(new Request('POST', 'https://example.com/?token=s1', ['Cookie' => 's2'], '{"password":"s3"}')))
+        ->toBe("https://example.com/?token=[redacted]\r\nPOST /?token=[redacted] HTTP/1.1\r\nHost: example.com\r\nCookie: [redacted]\r\n{\"password\":\"[redacted]\"}");
+});
+
 it('does not obfuscate body keys if none are configured', function (mixed $bodyKeys) {
     config(['http-client-global-logger.obfuscate.body_keys' => $bodyKeys]);
 

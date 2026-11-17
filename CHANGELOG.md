@@ -10,7 +10,7 @@
   - The password in the URL is obfuscated, e.g. `https://user:[redacted]@example.com`.
   - Password hashes of known algorithms are obfuscated anywhere, except for their algorithm identifier, e.g. `$2y$[redacted]` or `$argon2id$[redacted]`, like in [onlime/laravel-sql-reporter](https://github.com/onlime/laravel-sql-reporter).
   - JSON values with escaped quotes (`\"`) are obfuscated entirely, and so are values cut off by trimming the response body.
-  - Whitespace around the comma-separated patterns is ignored, e.g. `Authorization, Cookie`, and so are empty patterns, e.g. from a trailing comma.
+  - Whitespace around the comma-separated patterns is ignored, e.g. `Authorization, Cookie`, and so are empty patterns, e.g. from a trailing comma. In a published config file, the patterns may also be a comma-separated string instead of an array.
 - [Security] The mixin variant (`Http::log()`) obfuscates credentials like the global logging variants.
 - Fixed the mixin variant on Guzzle 8, where `Http::log()` threw an `InvalidArgumentException` (`The "handler" request option is not supported`) before sending the request. It also logs the request with the changes of global request middleware and of middleware added before `Http::log()` now, and each redirect separately. Middleware added after `Http::log()` is no longer ignored.
 - A failure while logging (e.g. an unwritable log file) is reported, and no longer breaks the HTTP request, in the global logging variants. The mixin variant (`Http::log()`) still throws a failure to write the log, like before.
