@@ -108,7 +108,7 @@ return [
     | Values of request and response headers, and of JSON-style ("key":"value")
     | and form/query-style (key=value) keys in the URL and body, are replaced
     | if their name matches any of these patterns. Matching is case-insensitive
-    | and supports wildcards using '*', see Illuminate\Support\Str::is().
+    | and supports wildcards using '*', see the README's "Sensitive data" section.
     | A password in the URL (https://user:password@example.com) is replaced too.
     */
     'obfuscate' => [

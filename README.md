@@ -203,9 +203,9 @@ The log contains full requests and responses, including all headers and bodies. 
 - **Headers** of requests and responses whose name matches `HTTP_CLIENT_GLOBAL_LOGGER_OBFUSCATE_HEADERS`, defaults to `*authorization,*cookie,*password*,*token*,*key,*secret*`. E.g. `Authorization`, `Proxy-Authorization`, `Cookie`, `Set-Cookie`, `X-Api-Password`, `PRIVATE-TOKEN` or `X-Api-Key`. Body keys in the values of other headers are obfuscated too, e.g. `X-Debug: token=[redacted]`.
 - **Values of body keys** whose name matches `HTTP_CLIENT_GLOBAL_LOGGER_OBFUSCATE_BODY_KEYS`, defaults to `pass,*password*,*token*,*secret*,*key,*signature*,sig`. They are replaced in JSON-style (`"key":"value"`) and form/query-style (`key=value`) text of the formatted message, which covers JSON and form bodies, and the query string of the URL. E.g. `{"password":"[redacted]"}`, `refresh_token=[redacted]` or `?api_key=[redacted]`.
 - **The password in the URL**, e.g. `https://user:[redacted]@example.com`.
-- **Password hashes** in the modular crypt format (`$<identifier>$…`), anywhere except for their algorithm identifier, also in the values of the body keys above, like in [onlime/laravel-sql-reporter](https://github.com/onlime/laravel-sql-reporter). E.g. `$2y$[redacted]` (bcrypt), `$argon2id$[redacted]`, or legacy ones like `$6$[redacted]` (SHA-512-crypt) or `$P$[redacted]` (phpass).
+- **Password hashes** of known algorithms in the modular crypt format (`$<identifier>$…`), anywhere except for their algorithm identifier, also in the values of the body keys above, like in [onlime/laravel-sql-reporter](https://github.com/onlime/laravel-sql-reporter). E.g. `$2y$[redacted]` (bcrypt), `$argon2id$[redacted]`, or legacy ones like `$6$[redacted]` (SHA-512-crypt) or `$P$[redacted]` (phpass). Other values like `$Summer-2024$…` aren't taken for a hash.
 
-Patterns are comma-separated, case-insensitive, and support wildcards using `*` (see [`Str::is()`](https://laravel.com/docs/strings#method-str-is)). A wildcard also matches the brackets of nested form keys, e.g. `user[password]` for `*password*`.
+Patterns are comma-separated and case-insensitive, and empty ones are ignored. They support wildcards using `*`, for headers like [`Str::is()`](https://laravel.com/docs/strings#method-str-is). For body keys, a leading `*` matches anything, as the match may then start anywhere in a key, e.g. `"api key"` for `*key`. A `*` within or at the end of a body key pattern matches the characters of a key: letters, digits, `_`, `.`, `-`, `%`, `[` and `]`, e.g. `user[password]` or `user%5Bpassword%5D` for `*password*`.
 
 Not obfuscated:
 
@@ -215,13 +215,15 @@ Not obfuscated:
 - Secrets in the path of the URL, or a token as its user name without password, e.g. `https://TOKEN@example.com`.
 - URL-encoded password hashes (`%242y%24…`) in the values of other keys.
 
+A body is never logged unobfuscated: if it can't be obfuscated, e.g. a JSON value with hundreds of thousands of escaped characters exceeding PCRE's limits without its JIT, it is left out of the log entry (`[body not logged: …]`).
+
 Protect the log file like any other log of your application: it is created with the same permissions as Laravel's own logs. If logging fails, e.g. because the log file isn't writable, the exception is reported and the HTTP request is sent as usual. This applies to the global logging variants 1 and 3, while the mixin variant (`Http::log()`) throws the exception.
 
 ## Upgrading
 
 ### v1.6.0
 
-The defaults of `HTTP_CLIENT_GLOBAL_LOGGER_OBFUSCATE_HEADERS`, `HTTP_CLIENT_GLOBAL_LOGGER_OBFUSCATE_BODY_KEYS` and `HTTP_CLIENT_GLOBAL_LOGGER_OBFUSCATE_REPLACEMENT` have changed. If you set any of them in your `.env`, or published the config file, compare them with the new defaults in [`config/http-client-global-logger.php`](config/http-client-global-logger.php), as your values replace them. Matching is case-insensitive now, with wildcard support, so your existing names keep working.
+The defaults of `HTTP_CLIENT_GLOBAL_LOGGER_OBFUSCATE_HEADERS`, `HTTP_CLIENT_GLOBAL_LOGGER_OBFUSCATE_BODY_KEYS` and `HTTP_CLIENT_GLOBAL_LOGGER_OBFUSCATE_REPLACEMENT` have changed. If you set any of them in your `.env`, or published the config file, compare them with the new defaults in [`config/http-client-global-logger.php`](config/http-client-global-logger.php), as your values replace them. Matching is case-insensitive now, with wildcard support, so your existing names keep working. Empty entries, e.g. from a trailing comma, are ignored now: in v1.5.0, an empty entry of `HTTP_CLIENT_GLOBAL_LOGGER_OBFUSCATE_BODY_KEYS` obfuscated all form and query values by accident.
 
 ## Testing
 

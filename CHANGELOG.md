@@ -8,12 +8,13 @@
   - New `HTTP_CLIENT_GLOBAL_LOGGER_OBFUSCATE_BODY_KEYS` default `pass,*password*,*token*,*secret*,*key,*signature*,sig` (was `pass,password,token,apikey,access_token,access_key,refresh_token,id_token,client_secret`), e.g. `accessToken`, `api_key`, `key`, `private_key`, `password_confirmation` or `X-Amz-Signature`.
   - Response headers are obfuscated too, e.g. `Set-Cookie`.
   - The password in the URL is obfuscated, e.g. `https://user:[redacted]@example.com`.
-  - Password hashes are obfuscated anywhere, except for their algorithm identifier, e.g. `$2y$[redacted]` or `$argon2id$[redacted]`, like in [onlime/laravel-sql-reporter](https://github.com/onlime/laravel-sql-reporter).
+  - Password hashes of known algorithms are obfuscated anywhere, except for their algorithm identifier, e.g. `$2y$[redacted]` or `$argon2id$[redacted]`, like in [onlime/laravel-sql-reporter](https://github.com/onlime/laravel-sql-reporter).
   - JSON values with escaped quotes (`\"`) are obfuscated entirely, and so are values cut off by trimming the response body.
-  - Whitespace around the comma-separated patterns is ignored, e.g. `Authorization, Cookie`.
+  - Whitespace around the comma-separated patterns is ignored, e.g. `Authorization, Cookie`, and so are empty patterns, e.g. from a trailing comma.
 - [Security] The mixin variant (`Http::log()`) obfuscates credentials like the global logging variants.
 - Fixed the mixin variant on Guzzle 8, where `Http::log()` threw an `InvalidArgumentException` (`The "handler" request option is not supported`) before sending the request. It also logs the request with the changes of global request middleware and of middleware added before `Http::log()` now, and each redirect separately. Middleware added after `Http::log()` is no longer ignored.
-- A failure while logging (e.g. an unwritable log file) is reported, and no longer breaks the HTTP request, in the global logging variants. The mixin variant (`Http::log()`) still throws it, like before.
+- A failure while logging (e.g. an unwritable log file) is reported, and no longer breaks the HTTP request, in the global logging variants. The mixin variant (`Http::log()`) still throws a failure to write the log, like before.
+- A body that can't be obfuscated, e.g. a JSON value exceeding PCRE's limits, is left out of the log entry (`[body not logged: …]`), instead of throwing a `RuntimeException`.
 - New `HTTP_CLIENT_GLOBAL_LOGGER_OBFUSCATE_REPLACEMENT` default `[redacted]` (was `**********`), like [onlime/laravel-sql-reporter](https://github.com/onlime/laravel-sql-reporter). It is inserted literally now, a replacement like `$1` or `0000` no longer breaks the log line.
 - Breaking, if you used or extended them: removed the `ObfuscatesBody` trait and the protected `LogRequestSending::obfuscateHeaders()`, replaced by the new `Support\ObfuscatingMessageFormatter`, used by all variants.
 - README: new "Sensitive data" and "Upgrading" sections.
