@@ -76,7 +76,8 @@ it('obfuscates body keys by case-insensitive wildcard patterns', function (strin
         '{"url":"https://example.com/?sig=s1&page=2"}',
         '{"url":"https://example.com/?sig=[redacted]&page=2"}',
     ],
-    // A form-style value runs past the end of the JSON string, but the next key's value is replaced before
+    // A form-style value runs past the end of the JSON string, up to the next & or whitespace, replacing the next key
+    // too. That key's value is replaced first, as the form-style value would otherwise end at its whitespace (s3).
     'json url before another key' => [
         '{"url":"https://example.com/?token=s1","api_key":"s2 s3"}',
         '{"url":"https://example.com/?token=[redacted]',
